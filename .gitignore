@@ -1,0 +1,7 @@
+# .gitignore
+# --- GitHubにアップしちゃダメなファイルやフォルダはここで指定するよ！ ---
+
+.env
+__pycache__/
+*.pyc
+data/
