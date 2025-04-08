@@ -1,0 +1,7 @@
+# requirements.txt
+# --- nyambotを動かすのに必要なPythonライブラリたち！Renderもこれを見てインストールするよ！ ---
+
+discord.py==2.3.2
+python-dotenv
+flask
+apscheduler
