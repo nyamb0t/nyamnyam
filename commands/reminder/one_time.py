@@ -51,6 +51,9 @@ class OneTimeReminder(commands.Cog):
         except ValueError:
             await ctx.send("日付の形式が正しくありません。例：2025-04-10 18:30")
 
-# setup_reminder から呼び出される
-def setup(bot):
-    bot.add_cog(OneTimeReminder(bot))
+# コマンドをBotに登録する setup 関数（setup_reminder から呼ばれる）
+async def setup(bot):
+    await bot.add_cog(OneTimeReminder(bot))
+
+
+
