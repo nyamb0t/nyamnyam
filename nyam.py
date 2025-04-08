@@ -24,6 +24,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
+    await bot.tree.sync()  # スラッシュコマンドをここで同期！
     print(f"Logged in as {bot.user.name} ({bot.user.id})")
 
 async def main():
