@@ -16,7 +16,6 @@ async def setup(bot):
     bot.tree.add_command(deletereminder)   # 個別削除
     bot.tree.add_command(showreminder)     # 現在のリスト表示
     bot.tree.add_command(clearreminder)    # 全削除
-    await bot.tree.sync()                  # スラッシュコマンドをDiscordに同期！
 
     # Bot起動時に、保存されたリマインダーを再スケジュール！
     for guild in bot.guilds:
