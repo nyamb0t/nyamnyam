@@ -75,6 +75,10 @@ async def set_vc(ctx, vc_input: str):
     
     await ctx.send(f"DEBUG: vc_id = {vc_id}")
     await ctx.send(f"DEBUG: vc_channel = {vc_channel}")
+    
+        # すべてのチャンネルIDをログに出す
+    for ch in ctx.guild.channels:
+        print(f"DEBUG: ch = {ch.name}, id = {ch.id}, type = {type(ch)}")
 
     if not isinstance(vc_channel, discord.VoiceChannel):
         await ctx.send("指定されたチャンネルはボイスチャンネルじゃないかも！")
