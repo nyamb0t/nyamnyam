@@ -59,21 +59,19 @@ async def delete_channel(ctx, channel: discord.TextChannel = None):
 # --- VC設定コマンド（!setvc #ボイスチャンネル）
 @commands.command(name='setvc')
 async def set_vc(ctx, vc_channel: discord.VoiceChannel):
-    """
-    VCを指定して、数字を反映するチャンネルを設定するよ！
-    メンション（リンク）でもOK！
-    """
-    data = load_guild_data(ctx.guild.id)
+    try:
+        data = load_guild_data(ctx.guild.id)
 
-    # すでに同じVCが設定されていたら、何もしない！
-    if data.get("vc_channel") == vc_channel.id:
-        await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
-        return
+        if data.get("vc_channel") == vc_channel.id:
+            await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
+            return
 
-    # 新しいVCとして設定する
-    data["vc_channel"] = vc_channel.id
-    save_guild_data(ctx.guild.id, data)
-    await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
+        data["vc_channel"] = vc_channel.id
+        save_guild_data(ctx.guild.id, data)
+        await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
+
+    except Exception as e:
+        await ctx.send(f"エラーが発生しちゃった：{e}")
 
 # --- VC解除コマンド（!deletevc）
 @commands.command(name='deletevc')
