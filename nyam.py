@@ -14,10 +14,6 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # --- Botに必要なintentsを設定 ---
-intents = discord.Intents.default()
-intents.message_content = True
-intents.guilds = True
-intents.members = True
 intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix="!", intents=intents)
