@@ -73,8 +73,8 @@ async def set_vc(ctx, vc_input: str):
     vc_id = int(match.group())
     vc_channel = ctx.guild.get_channel(vc_id)
     
-    print(f"vc_id: {vc_id}")
-    print(f"vc_channel: {vc_channel}")
+    await ctx.send(f"DEBUG: vc_id = {vc_id}")
+    await ctx.send(f"DEBUG: vc_channel = {vc_channel}")
 
     if not isinstance(vc_channel, discord.VoiceChannel):
         await ctx.send("指定されたチャンネルはボイスチャンネルじゃないかも！")
