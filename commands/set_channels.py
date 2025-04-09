@@ -73,13 +73,14 @@ async def set_vc(ctx, vc_input: str):
     vc_id = int(match.group())
     vc_channel = ctx.guild.get_channel(vc_id)
     
+      # こっちをDiscordメッセージで確認！
     await ctx.send(f"DEBUG: vc_id = {vc_id}")
     await ctx.send(f"DEBUG: vc_channel = {vc_channel}")
-    
-        # すべてのチャンネルIDをログに出す
-    for ch in ctx.guild.channels:
-        print(f"DEBUG: ch = {ch.name}, id = {ch.id}, type = {type(ch)}")
 
+    # 見えてるチャンネル一覧もDiscordに送る（簡易版）
+    visible_channels = "\n".join([f"{ch.name} ({ch.id})" for ch in ctx.guild.channels])
+    await ctx.send(f"DEBUG: 見えてるチャンネル一覧：\n{visible_channels[:1900]}")  # Discordのメッセ制限に注意！
+    
     if not isinstance(vc_channel, discord.VoiceChannel):
         await ctx.send("指定されたチャンネルはボイスチャンネルじゃないかも！")
         return
