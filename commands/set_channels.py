@@ -58,20 +58,33 @@ async def delete_channel(ctx, channel: discord.TextChannel = None):
 
 # --- VC設定コマンド（!setvc #ボイスチャンネル）
 @commands.command(name='setvc')
-async def set_vc(ctx, vc_channel: discord.VoiceChannel):
-    try:
-        data = load_guild_data(ctx.guild.id)
+async def set_vc(ctx, vc_input: str):
+    """
+    VCのメンション、ID、またはURLを指定してチャンネルを設定できるよ！
+    """
+    import re
 
-        if data.get("vc_channel") == vc_channel.id:
-            await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
-            return
+    # URL形式 or メンション形式 or IDを抽出
+    match = re.search(r'\d{17,}', vc_input)
+    if not match:
+        await ctx.send("チャンネルのIDが読み取れなかったよ〜！")
+        return
 
-        data["vc_channel"] = vc_channel.id
-        save_guild_data(ctx.guild.id, data)
-        await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
+    vc_id = int(match.group())
+    vc_channel = ctx.guild.get_channel(vc_id)
 
-    except Exception as e:
-        await ctx.send(f"エラーが発生しちゃった：{e}")
+    if not isinstance(vc_channel, discord.VoiceChannel):
+        await ctx.send("指定されたチャンネルはボイスチャンネルじゃないかも！")
+        return
+
+    data = load_guild_data(ctx.guild.id)
+    if data.get("vc_channel") == vc_channel.id:
+        await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
+        return
+
+    data["vc_channel"] = vc_channel.id
+    save_guild_data(ctx.guild.id, data)
+    await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
 
 # --- VC解除コマンド（!deletevc）
 @commands.command(name='deletevc')
