@@ -30,23 +30,15 @@ def save_guild_data(guild_id, data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 # --- チャンネル追加コマンド（!setch #チャンネル）
-@commands.command(name='setvc')
-async def set_vc(ctx, vc_channel: discord.VoiceChannel):
-    """
-    VCを指定して、数字を反映するチャンネルを設定するよ！
-    メンション（リンク）でもOK！
-    """
+@commands.command(name='setch')
+async def set_channel(ctx, channel: discord.TextChannel):
     data = load_guild_data(ctx.guild.id)
-
-    # すでに同じVCが設定されていたら何もしない
-    if data.get("vc_channel") == vc_channel.id:
-        await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
-        return
-
-    # 新しく設定
-    data["vc_channel"] = vc_channel.id
-    save_guild_data(ctx.guild.id, data)
-    await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
+    if channel.id not in data["text_channels"]:
+        data["text_channels"].append(channel.id)
+        save_guild_data(ctx.guild.id, data)
+        await ctx.send(f"{channel.name} に部屋番送るようにするね♩")
+    else:
+        await ctx.send(f"{channel.name} はもう追加済みだよ〜")
 
 # --- チャンネル削除コマンド（!deletech #チャンネル or !deletech）
 @commands.command(name='deletech')
