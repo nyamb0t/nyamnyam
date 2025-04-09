@@ -73,8 +73,8 @@ async def set_vc(ctx, vc_input: str):
     # サーバー内のボイスチャンネル一覧から探す
     vc_channel = discord.utils.get(ctx.guild.voice_channels, id=vc_id)
 
-    await ctx.send(f"DEBUG: vc_id = {vc_id}")
-    await ctx.send(f"DEBUG: vc_channel = {vc_channel}")
+    # await ctx.send(f"DEBUG: vc_id = {vc_id}")
+    # await ctx.send(f"DEBUG: vc_channel = {vc_channel}")
 
     if not isinstance(vc_channel, discord.VoiceChannel):
         await ctx.send("指定されたチャンネルはボイスチャンネルじゃないかも！")
