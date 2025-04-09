@@ -67,7 +67,7 @@ async def set_vc(ctx, vc_input: str):
     # URL形式 or メンション形式 or IDを抽出
     match = re.search(r'\d{17,}', vc_input)
     if not match:
-        await ctx.send("チャンネルのIDが読み取れなかったよ〜！")
+        await ctx.send("ごめんね、どこのVCかわからないから#か�で送ってほしいなㅜ.ㅜ")
         return
 
     vc_id = int(match.group())
