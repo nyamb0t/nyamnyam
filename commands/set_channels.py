@@ -73,7 +73,7 @@ async def set_vc(ctx, vc_channel: discord.VoiceChannel):
     """
     data = load_guild_data(ctx.guild.id)
 
-    # すでに同じVCが設定されていたら、何もしない
+    # すでに同じVCが設定されていたら、何もしない！
     if data.get("vc_channel") == vc_channel.id:
         await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
         return
