@@ -73,7 +73,7 @@ async def set_vc(ctx, vc_channel: discord.VoiceChannel):
         await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
         return
 
-    # 新しいVCとして設定
+    # 新しいVCとして設定する
     data["vc_channel"] = vc_channel.id
     save_guild_data(ctx.guild.id, data)
     await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
