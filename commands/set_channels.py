@@ -5,10 +5,11 @@ import discord
 from discord.ext import commands
 import os
 import json
+import re
 
 # --- 設定ファイルを保存するフォルダ
 DATA_DIR = "data"
-os.makedirs(DATA_DIR, exist_ok=True)  # フォルダがなければ作る！
+os.makedirs(DATA_DIR, exist_ok=True)  # フォルダがなければ作る
 
 # --- ギルド（サーバー）ごとの保存ファイルパスを返す関数
 def get_guild_file(guild_id):
@@ -45,7 +46,6 @@ async def set_channel(ctx, channel: discord.TextChannel):
 async def delete_channel(ctx, channel: discord.TextChannel = None):
     data = load_guild_data(ctx.guild.id)
     if channel is None:
-        # 引数なしの場合、全てのチャンネル設定を解除
         data["text_channels"] = []
         save_guild_data(ctx.guild.id, data)
         await ctx.send("全部のチャンネルへの送信やめるね❕")
@@ -56,31 +56,25 @@ async def delete_channel(ctx, channel: discord.TextChannel = None):
     else:
         await ctx.send("そのチャンネルは登録されてないかも！")
 
-# --- VC設定コマンド（!setvc #ボイスチャンネル）
+# --- VC設定コマンド（!setvc #ボイスチャンネル、URL、IDでもOK）
 @commands.command(name='setvc')
 async def set_vc(ctx, vc_input: str):
     """
     VCのメンション、ID、またはURLを指定してチャンネルを設定できるよ！
     """
-    import re
-
-    # URL形式 or メンション形式 or IDを抽出
     match = re.search(r'\d{17,}', vc_input)
     if not match:
         await ctx.send("チャンネルのIDが読み取れなかったよ〜！")
         return
 
     vc_id = int(match.group())
-    vc_channel = ctx.bot.get_channel(vc_id)
-    
-      # こっちをDiscordメッセージで確認！
+
+    # get_channelではなく、VC専用リストから探すように変更！
+    vc_channel = discord.utils.get(ctx.guild.voice_channels, id=vc_id)
+
     await ctx.send(f"DEBUG: vc_id = {vc_id}")
     await ctx.send(f"DEBUG: vc_channel = {vc_channel}")
 
-    # 見えてるチャンネル一覧もDiscordに送る（簡易版）
-    visible_channels = "\n".join([f"{ch.name} ({ch.id})" for ch in ctx.guild.channels])
-    await ctx.send(f"DEBUG: 見えてるチャンネル一覧：\n{visible_channels[:1900]}")  # Discordのメッセ制限に注意！
-    
     if not isinstance(vc_channel, discord.VoiceChannel):
         await ctx.send("指定されたチャンネルはボイスチャンネルじゃないかも！")
         return
@@ -102,7 +96,7 @@ async def delete_vc(ctx):
     save_guild_data(ctx.guild.id, data)
     await ctx.send("VCの名前変えるのやめるね❕おつかれさま〜")
 
-# --- Botにコマンドを登録するための関数（setup_commandsから呼び出される）
+# --- Botにコマンドを登録する関数
 def setup(bot):
     bot.add_command(set_channel)
     bot.add_command(delete_channel)
