@@ -62,14 +62,15 @@ async def set_vc(ctx, vc_input: str):
     """
     VCのメンション、ID、またはURLを指定してチャンネルを設定できるよ！
     """
-    match = re.search(r'\d{17,}', vc_input)
-    if not match:
+    matches = re.findall(r'\d{17,}', vc_input)
+    if not matches:
         await ctx.send("チャンネルのIDが読み取れなかったよ〜！")
         return
 
-    vc_id = int(match.group())
+    # URLの場合（https://discord.com/channels/サーバーID/チャンネルID）、後ろのIDを使う！
+    vc_id = int(matches[-1])
 
-    # get_channelではなく、VC専用リストから探すように変更！
+    # サーバー内のボイスチャンネル一覧から探す
     vc_channel = discord.utils.get(ctx.guild.voice_channels, id=vc_id)
 
     await ctx.send(f"DEBUG: vc_id = {vc_id}")
