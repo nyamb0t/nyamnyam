@@ -37,11 +37,16 @@ async def set_vc(ctx, vc_channel: discord.VoiceChannel):
     メンション（リンク）でもOK！
     """
     data = load_guild_data(ctx.guild.id)
+
+    # すでに同じVCが設定されていたら何もしない
+    if data.get("vc_channel") == vc_channel.id:
+        await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
+        return
+
+    # 新しく設定
     data["vc_channel"] = vc_channel.id
     save_guild_data(ctx.guild.id, data)
     await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
-    else:
-        await ctx.send(f"{channel.name} はもう追加済みだよ〜")
 
 # --- チャンネル削除コマンド（!deletech #チャンネル or !deletech）
 @commands.command(name='deletech')
