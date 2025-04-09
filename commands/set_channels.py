@@ -8,7 +8,7 @@ import json
 
 # --- 設定ファイルを保存するフォルダ
 DATA_DIR = "data"
-os.makedirs(DATA_DIR, exist_ok=True)  # フォルダがなければ作る
+os.makedirs(DATA_DIR, exist_ok=True)  # フォルダがなければ作る！
 
 # --- ギルド（サーバー）ごとの保存ファイルパスを返す関数
 def get_guild_file(guild_id):
