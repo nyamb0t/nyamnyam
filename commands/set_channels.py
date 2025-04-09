@@ -71,7 +71,7 @@ async def set_vc(ctx, vc_input: str):
         return
 
     vc_id = int(match.group())
-    vc_channel = ctx.guild.get_channel(vc_id)
+    vc_channel = ctx.bot.get_channel(vc_id)
     
       # こっちをDiscordメッセージで確認！
     await ctx.send(f"DEBUG: vc_id = {vc_id}")
