@@ -1,108 +1,100 @@
 # commands/reminder/daily.py
-# --- 毎日決まった時間にメッセージを送るリマインダーのコマンドを定義してるファイル！
-#     スラッシュコマンドで登録される！
+# --- 毎日決まった時間にリマインダーを送るコマンドを管理するファイル
+#     通常のテキストコマンド（!setdailyなど）で操作する！
 
 import discord
-from discord import app_commands
+from discord.ext import commands
 from utils.scheduler import schedule_daily_reminder, cancel_daily_reminder
 from utils.reminder_storage import load_reminders, save_reminders
 
-REMINDER_TYPE = "daily"  # reminderの種類（フォルダ保存時に使う）
-registered_jobs = {}  # 実行中のリマインダーを記録しておく辞書
+REMINDER_TYPE = "daily"  # reminderタイプの識別子（保存フォルダなどで使う）
+registered_jobs = {}     # スケジューラーに登録されているリマインダーを記録する辞書
 
-# --- Botにコマンドを登録する関数（setup_reminder から呼ばれる）
-async def setup(bot):
-    bot.tree.add_command(setreminder)      # 毎日リマインダーの設定
-    bot.tree.add_command(deletereminder)   # 個別削除
-    bot.tree.add_command(showreminder)     # 現在のリスト表示
-    bot.tree.add_command(clearreminder)    # 全削除
+# --- メインクラス（Cog）：Botにコマンドをまとめて登録できる仕組み
+class DailyReminder(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-    # Bot起動時に、保存されたリマインダーを再スケジュール！
-    for guild in bot.guilds:
-        reminders = load_reminders(guild.id, REMINDER_TYPE)
-        for rem in reminders:
-            schedule_daily_reminder(
-                bot,
-                guild.id,
-                rem["time"],
-                rem["message"],
-                rem["channel_id"],
-                registered_jobs,
-                REMINDER_TYPE
-            )
+    # --- !setdaily 09:00 [チャンネル] メッセージ
+    # 時間・チャンネル・メッセージを指定して、毎日のリマインダーを登録！
+    @commands.command(name="setdaily")
+    async def set_daily(self, ctx, time: str, channel: discord.TextChannel = None, *, message: str):
+        channel = channel or ctx.channel  # チャンネルが指定されてなければ、コマンドを打ったチャンネルを使う
+        guild_id = ctx.guild.id
 
-# --- スラッシュコマンド定義部分 ---
+        reminders = load_reminders(guild_id, REMINDER_TYPE)
 
-@app_commands.command(
-    name="setreminder",
-    description="毎日特定の時間にリマインダーを設定します（JST）"
-)
-@app_commands.describe(time="時間（例：09:00）", channel="送信先チャンネル", message="送信するメッセージ")
-async def setreminder(interaction: discord.Interaction, time: str, message: str, channel: discord.TextChannel = None):
-    await interaction.response.defer()
+        # 同じ時間・同じチャンネルにすでにあるか確認
+        for r in reminders:
+            if r["time"] == time and r["channel_id"] == channel.id:
+                await ctx.send("その時間・チャンネルのリマインダーはすでに設定されてるよ！")
+                return
 
-    guild_id = interaction.guild.id
-    channel = channel or interaction.channel
-    reminders = load_reminders(guild_id, REMINDER_TYPE)
+        # リストに追加して保存
+        reminder = {
+            "time": time,
+            "message": message,
+            "channel_id": channel.id
+        }
+        reminders.append(reminder)
+        save_reminders(guild_id, REMINDER_TYPE, reminders)
 
-    # 同じ時間・チャンネルの重複チェック
-    for r in reminders:
-        if r["time"] == time and r["channel_id"] == channel.id:
-            await interaction.followup.send("その時間・チャンネルのリマインダーはすでに設定されています。")
+        # スケジューラーに登録
+        schedule_daily_reminder(self.bot, guild_id, time, message, channel.id, registered_jobs, REMINDER_TYPE)
+
+        await ctx.send(f"{time} に毎日リマインダー送るようにしたよ！")
+
+    # --- !deletedaily 09:00 [チャンネル]
+    # 指定した時間・チャンネルのリマインダーを削除！
+    @commands.command(name="deletedaily")
+    async def delete_daily(self, ctx, time: str, channel: discord.TextChannel = None):
+        channel = channel or ctx.channel
+        guild_id = ctx.guild.id
+
+        reminders = load_reminders(guild_id, REMINDER_TYPE)
+        new_reminders = [r for r in reminders if not (r["time"] == time and r["channel_id"] == channel.id)]
+
+        # 削除対象が見つからなかった場合
+        if len(reminders) == len(new_reminders):
+            await ctx.send("その時間・チャンネルのリマインダーは見つからなかったよ…！")
             return
 
-    # 新しいリマインダー情報を追加
-    reminder = {
-        "time": time,
-        "message": message,
-        "channel_id": channel.id
-    }
-    reminders.append(reminder)
-    save_reminders(guild_id, REMINDER_TYPE, reminders)
+        # 保存を更新＋スケジューラーからも削除
+        save_reminders(guild_id, REMINDER_TYPE, new_reminders)
+        cancel_daily_reminder(guild_id, time, channel.id, registered_jobs, REMINDER_TYPE)
 
-    # スケジューラーに追加
-    schedule_daily_reminder(bot=interaction.client, guild_id=guild_id, time=time, message=message,
-                            channel_id=channel.id, jobs=registered_jobs, reminder_type=REMINDER_TYPE)
+        await ctx.send(f"{time} のリマインダーを削除したよ！")
 
-    await interaction.followup.send(f"{time} に毎日リマインダーを送るよう設定しました！")
+    # --- !showdaily
+    # 現在のリマインダー設定を一覧表示
+    @commands.command(name="showdaily")
+    async def show_daily(self, ctx):
+        guild_id = ctx.guild.id
+        reminders = load_reminders(guild_id, REMINDER_TYPE)
 
-@app_commands.command(name="deletereminder", description="特定のリマインダーを削除します")
-@app_commands.describe(time="時間（例：09:00）", channel="チャンネル")
-async def deletereminder(interaction: discord.Interaction, time: str, channel: discord.TextChannel):
-    await interaction.response.defer()
+        if not reminders:
+            await ctx.send("いま設定されてる毎日リマインダーはないよ！")
+            return
 
-    guild_id = interaction.guild.id
-    reminders = load_reminders(guild_id, REMINDER_TYPE)
+        # 表示用メッセージを作成
+        lines = [f"{r['time']} - <#{r['channel_id']}> - {r['message']}" for r in reminders]
+        await ctx.send("現在のリマインダー設定：\n" + "\n".join(lines))
 
-    # 指定された時間・チャンネルのリマインダーを削除
-    reminders = [r for r in reminders if not (r["time"] == time and r["channel_id"] == channel.id)]
-    save_reminders(guild_id, REMINDER_TYPE, reminders)
-    cancel_daily_reminder(guild_id, time, channel.id, registered_jobs, REMINDER_TYPE)
+    # --- !cleardaily
+    # 全てのリマインダーを削除（保存とスケジューラーの両方）
+    @commands.command(name="cleardaily")
+    async def clear_daily(self, ctx):
+        guild_id = ctx.guild.id
+        reminders = load_reminders(guild_id, REMINDER_TYPE)
 
-    await interaction.followup.send(f"{time} のリマインダーを削除しました。")
+        # スケジューラーからキャンセル
+        for r in reminders:
+            cancel_daily_reminder(guild_id, r["time"], r["channel_id"], registered_jobs, REMINDER_TYPE)
 
-@app_commands.command(name="showreminder", description="設定されているリマインダーを表示します")
-async def showreminder(interaction: discord.Interaction):
-    guild_id = interaction.guild.id
-    reminders = load_reminders(guild_id, REMINDER_TYPE)
+        # 保存ファイルを空に
+        save_reminders(guild_id, REMINDER_TYPE, [])
+        await ctx.send("すべてのリマインダーを削除したよ〜")
 
-    if not reminders:
-        await interaction.response.send_message("現在、設定されているリマインダーはありません。")
-        return
-
-    message = "\n".join([
-        f"{r['time']} - <#{r['channel_id']}> - {r['message']}"
-        for r in reminders
-    ])
-    await interaction.response.send_message(f"現在のリマインダー設定：\n{message}")
-
-@app_commands.command(name="clearreminder", description="すべてのリマインダーを削除します")
-async def clearreminder(interaction: discord.Interaction):
-    guild_id = interaction.guild.id
-    reminders = load_reminders(guild_id, REMINDER_TYPE)
-
-    for r in reminders:
-        cancel_daily_reminder(guild_id, r["time"], r["channel_id"], registered_jobs, REMINDER_TYPE)
-
-    save_reminders(guild_id, REMINDER_TYPE, [])
-    await interaction.response.send_message("すべてのリマインダーを削除しました。")
+# --- このファイルをBotに読み込ませるための setup 関数（__init__.py から呼ばれる）
+def setup(bot):
+    bot.add_cog(DailyReminder(bot))
