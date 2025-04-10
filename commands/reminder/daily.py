@@ -33,7 +33,7 @@ class DailyReminder(commands.Cog):
 
     @app_commands.command(name="setdaily", description="毎日決まった時間におしらせする")
     @app_commands.describe(time="時間（例: 10:27）", channel="おくるチャンネル", message="おくるメッセージ")
-        async def set_daily(self, interaction: discord.Interaction, time: str, message: str, channel: discord.TextChannel = None):
+    async def set_daily(self, interaction: discord.Interaction, time: str, message: str, channel: discord.TextChannel = None):
         guild_id = interaction.guild.id
         channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
