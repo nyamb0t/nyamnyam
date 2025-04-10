@@ -54,10 +54,10 @@ async def send_backup_to_discord():
 # --- メイン関数でBotを起動！
 async def main():
     keep_alive()
+    start_scheduler()
     await setup_commands(bot)         # スラッシュコマンドの登録
     await setup_message_handler(bot)  # 数字転送・VC名変更のイベント登録
     await setup_reminder_commands(bot)  # リマインダー機能
-    start_scheduler()
     await bot.start(TOKEN)
 
 if __name__ == "__main__":
