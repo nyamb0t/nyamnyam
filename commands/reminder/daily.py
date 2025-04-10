@@ -101,7 +101,7 @@ class DailyReminder(commands.Cog):
                 self.reminders_list = reminders_list
 
                 for idx, reminder in enumerate(reminders_list):
-                    label = f"{reminder['time']} - <#{reminder['channel_id']}>"
+                    label = f"{reminder['message']}>"
                     self.add_item(self.ReminderButton(label, idx))
 
             class ReminderButton(discord.ui.Button):
