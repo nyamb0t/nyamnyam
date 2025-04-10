@@ -37,7 +37,7 @@ class DailyReminder(commands.Cog):
         # スケジュール登録
         schedule_daily_reminder(self.bot, guild_id, time, message, channel.id, registered_jobs, REMINDER_TYPE)
 
-        await interaction.followup.send(f"{time} に毎日リマインダー送るように設定したよ！")
+        await interaction.followup.send(f"まいにちおしらせするね！\n時間:{time}\n{channel.mention}\n{r['message']}")
 
     # --- /deletedaily 00:00 [チャンネル]
     @app_commands.command(name="deletedaily", description="特定のリマインダーを削除するよ")
@@ -57,7 +57,7 @@ class DailyReminder(commands.Cog):
         save_reminders(guild_id, REMINDER_TYPE, new_reminders)
         cancel_daily_reminder(guild_id, time, channel.id, registered_jobs, REMINDER_TYPE)
 
-        await interaction.followup.send(f"{time} のリマインダーを削除したよ！")
+        await interaction.followup.send(f"このmeowをけしたよ！\n時間:{time}\n{channel.mention}\n{r['message']}")
 
     # --- /showdaily
     @app_commands.command(name="showdaily", description="現在のリマインダーを一覧表示するよ")
