@@ -7,5 +7,5 @@ from . import one_time  # 一回きりのリマインダー処理
 
 # この関数は setup_commands(bot) の中から呼ばれて、リマインダー関係をすべてBotに登録する！
 async def setup_reminder(bot):
-    await daily.setup(bot)       # 毎日リマインダーのコマンドを登録
+    daily.setup(bot)       # 毎日リマインダーのコマンドを登録
     await one_time.setup(bot)    # 一度きりリマインダーのコマンドを登録
