@@ -110,3 +110,32 @@ class DailyReminder(commands.Cog):
 # --- Botにコマンド登録する setup 関数（クラスの外に！）
 async def setup(bot: discord.Client):
     await bot.add_cog(DailyReminder(bot))
+    
+# --- Bot起動時にすべてのリマインダーを再登録する
+async def reload_all_daily_reminders(bot):
+    from utils.reminder_storage import load_reminders
+    from utils.scheduler import schedule_daily_reminder
+    import os
+
+    base_folder = "data/reminders"
+    if not os.path.exists(base_folder):
+        return
+
+    for guild_folder in os.listdir(base_folder):
+        guild_id = int(guild_folder)
+        path = os.path.join(base_folder, guild_folder, "daily.json")
+        if not os.path.exists(path):
+            continue
+
+        from utils.reminder_storage import load_reminders
+        reminders = load_reminders(guild_id, "daily")
+        for r in reminders:
+            schedule_daily_reminder(
+                bot,
+                guild_id,
+                r["time"],
+                r["message"],
+                r["channel_id"],
+                registered_jobs,
+                REMINDER_TYPE
+            )
