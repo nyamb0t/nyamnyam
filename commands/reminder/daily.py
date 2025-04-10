@@ -37,6 +37,8 @@ class DailyReminder(commands.Cog):
         guild_id = interaction.guild.id
         channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
+        
+        await interaction.response.defer(ephemeral=True)
 
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
