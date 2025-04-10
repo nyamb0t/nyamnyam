@@ -15,13 +15,13 @@ class ConfirmAddButton(discord.ui.View):
         super().__init__(timeout=60)
         self.value = None
 
-    @discord.ui.button(label="追加する", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="ʏᴇꜱ", style=discord.ButtonStyle.success)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = True
         await interaction.response.send_message("追加しました👌🏻", ephemeral=True)
         self.stop()
 
-    @discord.ui.button(label="やめとく", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="ɴᴏ", style=discord.ButtonStyle.danger)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
         await interaction.response.send_message("キャンセルしたよ✌🏻", ephemeral=True)
@@ -42,9 +42,9 @@ class DailyReminder(commands.Cog):
             if r["time"] == time and r["channel_id"] == channel.id:
                 view = ConfirmAddButton()
                 await interaction.response.send_message(
-                    f"同じ時間とチャンネルに先客がいます😭\n"
+                    f"同じ時間とチャンネルに先客がいます🐱\n"
                     f"‪‪   {time} {channel.mention} ‪‪︎···▸﻿ {r['message']}\n"
-                    f"追加で登録する？",
+                    f"追加する？",
                     view=view,
                     ephemeral=True
                 )
