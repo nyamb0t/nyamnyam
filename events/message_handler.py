@@ -1,88 +1,62 @@
 # events/message_handler.py
-# --- メッセージの中にある「5桁の数字」を検出して、転送したりVC名を変更したりする処理！
+# --- メッセージの監視をして、5桁の数字を検出＆転送、VC名変更をするイベントハンドラ！
 
-import re
 import discord
-import os
-import json
-from datetime import datetime
+from discord.ext import commands
+import re
+import time
+from utils.channel_storage import load_guild_data, save_guild_data
 
-DATA_DIR = "data"
+recent_numbers = {}  # サーバーごとに、最近送信された数字を記録（重複送信防止）
 
-# --- サーバーごとのデータファイルのパスを作る
-def get_guild_file(guild_id):
-    return os.path.join(DATA_DIR, f"{guild_id}_channels.json")
+class MessageHandler(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-# --- ファイルから設定を読み込む
-def load_guild_data(guild_id):
-    path = get_guild_file(guild_id)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"text_channels": [], "vc_channel": None, "last_sent": {}}
-
-# --- 設定を保存する
-def save_guild_data(guild_id, data):
-    path = get_guild_file(guild_id)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-# --- on_message イベントをセットする関数（nyam.py から呼ばれる）
-def setup_message_handler(bot):
-    @bot.event
-    async def on_message(message):
-        if message.author == bot.user:
-            return  # Bot自身のメッセージは無視！
-
-        await bot.process_commands(message)  # コマンド処理（!setch など）も忘れず！
-
-        if message.content.startswith("!"):
-            return  # コマンド系は無視（数字検出しない）
-
-        # --- メッセージから5桁の数字を探す（前後が数字じゃない場合に限定）
-        five_digit_numbers = re.findall(r'(?<!\d)\d{5}(?!\d)', message.content)
-        if not five_digit_numbers:
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
             return
 
-        number = five_digit_numbers[0]  # 複数あっても最初の1つだけ使う
         guild_id = message.guild.id
         data = load_guild_data(guild_id)
 
-        now = datetime.utcnow().timestamp()
-        last_sent = data.get("last_sent", {})
+        # --- 5桁の数字を検出
+        match = re.search(r"\b\d{5}\b", message.content)
+        if not match:
+            return
 
-        if number not in last_sent:
-            last_sent[number] = {}
+        number = match.group()
 
-        # --- 転送設定されてるテキストチャンネルに送る
-        for channel_id in data.get("text_channels", []):
-            if channel_id == message.channel.id:
-                continue  # 送信元チャンネルならスキップ！
+        # --- 重複送信を5分以内は防ぐ
+        now = time.time()
+        if guild_id not in recent_numbers:
+            recent_numbers[guild_id] = {}
+        if number in recent_numbers[guild_id]:
+            if now - recent_numbers[guild_id][number] < 300:
+                return  # 5分以内に同じ数字が送られてたらスキップ
 
-            last_time = last_sent[number].get(str(channel_id), 0)
-            if now - last_time < 300:
-                continue  # 同じ内容を5分以内に送ってたらスキップ！
+        recent_numbers[guild_id][number] = now  # 今回の送信を記録
 
-            channel = bot.get_channel(channel_id)
+        # --- 転送チャンネルに送信
+        for channel_id in data["text_channels"]:
+            if message.channel.id == channel_id:
+                continue  # 元のチャンネルには送らない
+
+            channel = self.bot.get_channel(channel_id)
             if channel:
                 await channel.send(number)
-                last_sent[number][str(channel_id)] = now  # 最終送信時刻を更新
 
-        # --- VC名の変更処理（【12345】 に更新）
-        vc_channel_id = data.get("vc_channel")
-        if vc_channel_id:
-            vc_channel = bot.get_channel(vc_channel_id)
-            if vc_channel:
-                current_name = vc_channel.name
-                # 【xxxxx】 がついてたら取り除く
-                base_name = re.sub(r'【\d{5}】$', '', current_name).strip()
-                new_name = f"{base_name}  【{number}】"
-                if current_name != new_name:
-                    try:
-                        await vc_channel.edit(name=new_name)
-                    except Exception as e:
-                        print(f"VC名前変更失敗: {e}")
+        # --- VCの名前を変更
+        vc_id = data.get("vc_channel")
+        if vc_id:
+            vc_channel = self.bot.get_channel(vc_id)
+            if isinstance(vc_channel, discord.VoiceChannel):
+                # すでに同じ数字なら変更不要
+                new_name = re.sub(r"【\d{5}】", f"【{number}】", vc_channel.name)
+                if vc_channel.name != new_name:
+                    await vc_channel.edit(name=new_name)
 
-        # --- 保存して終了
-        data["last_sent"] = last_sent
-        save_guild_data(guild_id, data)
+# --- このイベントをBotに登録する setup 関数
+async def setup(bot):
+    await bot.add_cog(MessageHandler(bot))
