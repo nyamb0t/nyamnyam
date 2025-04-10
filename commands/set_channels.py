@@ -1,11 +1,11 @@
 # commands/set_channels.py
-# --- チャンネルの設定、VC名の変更など、部屋番系のコマンドを管理するファイル！
+# --- スラッシュコマンド版：チャンネルの設定、VC名の変更など、部屋番系のコマンドを管理するファイル！
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 import os
 import json
-import re
 
 # --- 設定ファイルを保存するフォルダ
 DATA_DIR = "data"
@@ -16,17 +16,13 @@ def get_guild_file(guild_id):
     return os.path.join(DATA_DIR, f"{guild_id}_channels.json")
 
 # --- ギルドの設定ファイルを読み込む関数
-def save_guild_data(guild_id, data):
+def load_guild_data(guild_id):
     path = get_guild_file(guild_id)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-    # --- ここから追加！ ---
-    backup_dir = "backup"
-    os.makedirs(backup_dir, exist_ok=True)
-    backup_path = os.path.join(backup_dir, f"{guild_id}_channels.json")
-    with open(backup_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    # ファイルがなければ初期データを返す
+    return {"text_channels": [], "vc_channel": None, "last_sent": {}}
 
 # --- ギルドの設定データを保存する関数
 def save_guild_data(guild_id, data):
@@ -34,76 +30,68 @@ def save_guild_data(guild_id, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-# --- チャンネル追加コマンド（!setch #チャンネル）
-@commands.command(name='setch')
-async def set_channel(ctx, channel: discord.TextChannel):
-    data = load_guild_data(ctx.guild.id)
-    if channel.id not in data["text_channels"]:
-        data["text_channels"].append(channel.id)
-        save_guild_data(ctx.guild.id, data)
-        await ctx.send(f"{channel.name} に部屋番送るようにするね♩")
-    else:
-        await ctx.send(f"{channel.name} はもう追加済みだよ〜")
+# --- スラッシュコマンドの管理クラス（Cog）
+class ChannelSettings(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-# --- チャンネル削除コマンド（!deletech #チャンネル or !deletech）
-@commands.command(name='deletech')
-async def delete_channel(ctx, channel: discord.TextChannel = None):
-    data = load_guild_data(ctx.guild.id)
-    if channel is None:
-        data["text_channels"] = []
-        save_guild_data(ctx.guild.id, data)
-        await ctx.send("全部のチャンネルへの送信やめるね❕")
-    elif channel.id in data["text_channels"]:
-        data["text_channels"].remove(channel.id)
-        save_guild_data(ctx.guild.id, data)
-        await ctx.send(f"{channel.name} への送信を解除したよ❣️")
-    else:
-        await ctx.send("そのチャンネルは登録されてないかも！")
+    # --- /setch チャンネル
+    @app_commands.command(name="setch", description="部屋番を送るチャンネルを設定します")
+    @app_commands.describe(channel="送信先チャンネル")
+    async def setch(self, interaction: discord.Interaction, channel: discord.TextChannel):
+        guild_id = interaction.guild.id
+        data = load_guild_data(guild_id)
 
-# --- VC設定コマンド（!setvc #ボイスチャンネル、URL、IDでもOK）
-@commands.command(name='setvc')
-async def set_vc(ctx, vc_input: str):
-    """
-    VCのメンション、ID、またはURLを指定してチャンネルを設定できるよ！
-    """
-    matches = re.findall(r'\d{17,}', vc_input)
-    if not matches:
-        await ctx.send("チャンネルのIDが読み取れなかったよ〜！")
-        return
+        if channel.id not in data["text_channels"]:
+            data["text_channels"].append(channel.id)
+            save_guild_data(guild_id, data)
+            await interaction.response.send_message(f"{channel.name} に部屋番送るようにするね♩")
+        else:
+            await interaction.response.send_message(f"{channel.name} はもう追加済みだよ〜")
 
-    # URLの場合（https://discord.com/channels/サーバーID/チャンネルID）、後ろのIDを使う！
-    vc_id = int(matches[-1])
+    # --- /deletech チャンネル（省略可）
+    @app_commands.command(name="deletech", description="部屋番送信チャンネルを解除します")
+    @app_commands.describe(channel="解除するチャンネル（未指定で全解除）")
+    async def deletech(self, interaction: discord.Interaction, channel: discord.TextChannel = None):
+        guild_id = interaction.guild.id
+        data = load_guild_data(guild_id)
 
-    # サーバー内のボイスチャンネル一覧から探す
-    vc_channel = discord.utils.get(ctx.guild.voice_channels, id=vc_id)
+        if channel is None:
+            data["text_channels"] = []
+            save_guild_data(guild_id, data)
+            await interaction.response.send_message("全部のチャンネルへの送信やめるね❕")
+        elif channel.id in data["text_channels"]:
+            data["text_channels"].remove(channel.id)
+            save_guild_data(guild_id, data)
+            await interaction.response.send_message(f"{channel.name} への送信を解除したよ❣️")
+        else:
+            await interaction.response.send_message("そのチャンネルは登録されてないかも！")
 
-    # await ctx.send(f"DEBUG: vc_id = {vc_id}")
-    # await ctx.send(f"DEBUG: vc_channel = {vc_channel}")
+    # --- /setvc VCチャンネル
+    @app_commands.command(name="setvc", description="部屋番を反映するVCを設定します")
+    @app_commands.describe(vc_channel="部屋番をつけるVCチャンネル")
+    async def setvc(self, interaction: discord.Interaction, vc_channel: discord.VoiceChannel):
+        guild_id = interaction.guild.id
+        data = load_guild_data(guild_id)
 
-    if not isinstance(vc_channel, discord.VoiceChannel):
-        await ctx.send("指定されたチャンネルはボイスチャンネルじゃないかも！")
-        return
+        if data.get("vc_channel") == vc_channel.id:
+            await interaction.response.send_message(f"{vc_channel.name} はもう追加済みだよ〜")
+            return
 
-    data = load_guild_data(ctx.guild.id)
-    if data.get("vc_channel") == vc_channel.id:
-        await ctx.send(f"{vc_channel.name} はもう追加済みだよ〜")
-        return
+        data["vc_channel"] = vc_channel.id
+        save_guild_data(guild_id, data)
+        await interaction.response.send_message(f"{vc_channel.name} に部屋番反映させるね♩")
 
-    data["vc_channel"] = vc_channel.id
-    save_guild_data(ctx.guild.id, data)
-    await ctx.send(f"{vc_channel.name} に部屋番反映させるね♩")
+    # --- /deletevc
+    @app_commands.command(name="deletevc", description="部屋番のVC反映を解除します")
+    async def deletevc(self, interaction: discord.Interaction):
+        guild_id = interaction.guild.id
+        data = load_guild_data(guild_id)
 
-# --- VC解除コマンド（!deletevc）
-@commands.command(name='deletevc')
-async def delete_vc(ctx):
-    data = load_guild_data(ctx.guild.id)
-    data["vc_channel"] = None
-    save_guild_data(ctx.guild.id, data)
-    await ctx.send("VCの名前変えるのやめるね❕おつかれさま〜")
+        data["vc_channel"] = None
+        save_guild_data(guild_id, data)
+        await interaction.response.send_message("VCの名前変えるのやめるね❕おつかれさま〜")
 
-# --- Botにコマンドを登録する関数
-def setup(bot):
-    bot.add_command(set_channel)
-    bot.add_command(delete_channel)
-    bot.add_command(set_vc)
-    bot.add_command(delete_vc)
+# --- BotにこのCogを登録する setup 関数（commands/__init__.py から呼び出される）
+async def setup(bot):
+    await bot.add_cog(ChannelSettings(bot))
