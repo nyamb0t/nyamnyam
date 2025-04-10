@@ -28,7 +28,7 @@ async def on_ready():
 
 # --- バックアップを送る関数 ---
 async def send_backup_to_discord():
-    channel_id = 送信先チャンネルのIDをここに！  # 例: 944884833191084062
+    #channel_id = 送信先チャンネルのIDをここに！  # 例: 944884833191084062
     channel = bot.get_channel(channel_id)
     if not channel:
         print("送信先チャンネルが見つからなかった！")
