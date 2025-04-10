@@ -23,6 +23,7 @@ bot = MyBot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
+    await bot.tree.sync()  # スラッシュコマンドの同期はここで！
     print(f"Logged in as {bot.user.name} ({bot.user.id})")
 
     # バックアップログの送信（必要に応じてコメントアウトでON/OFF）
