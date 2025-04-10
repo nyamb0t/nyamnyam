@@ -7,7 +7,6 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from keep_alive import keep_alive
 from commands import setup_commands
-from events.message_handler import setup_message_handler
 import asyncio
 
 load_dotenv()
@@ -52,7 +51,6 @@ async def send_backup_to_discord():
 async def main():
     keep_alive()
     await setup_commands(bot)         # スラッシュコマンドの登録
-    setup_message_handler(bot)        # メッセージイベントの登録
     await bot.start(TOKEN)
 
 if __name__ == "__main__":
