@@ -98,16 +98,21 @@ class DailyReminder(commands.Cog):
         channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
 
-        # 削除
-        new_reminders = [r for r in reminders if not (r["time"] == time and r["channel_id"] == channel.id)]
-        if len(reminders) == len(new_reminders):
+        # 削除対象を見つけて保持しておく
+        target = next((r for r in reminders if r["time"] == time and r["channel_id"] == channel.id), None)
+        
+        if not target:
             await interaction.followup.send("時間かチャンネルまちがえてないかな。。？")
             return
-
+        
+        # 削除処理
+        new_reminders = [r for r in reminders if r != target]
         save_reminders(guild_id, REMINDER_TYPE, new_reminders)
         cancel_daily_reminder(guild_id, time, channel.id, registered_jobs, REMINDER_TYPE)
-
-        await interaction.followup.send(f"このmeowをけしたよ！\n   {time} {channel.mention} ‪‪❤︎‬ {r['message']}")
+        
+        await interaction.followup.send(
+            f"このmeowをけしたよ！\n   {time} {channel.mention} ‪‪❤︎‬ {target['message']}"
+        )
 
     # --- /showdaily
     @app_commands.command(name="showdaily", description="毎日のおしらせ予定が一覧でみれる")
@@ -149,14 +154,14 @@ async def reload_all_daily_reminders(bot):
     if not os.path.exists(base_folder):
         return
 
-        for guild_folder in os.listdir(base_folder):
-            if not guild_folder.isdigit():
-                continue  # フォルダ名が数字じゃない（.gitkeepなど）はスキップ！
+    for guild_folder in os.listdir(base_folder):
+        if not guild_folder.isdigit():
+            continue  # フォルダ名が数字じゃない（.gitkeepなど）はスキップ！
 
-            guild_id = int(guild_folder)
-            path = os.path.join(base_folder, guild_folder, "daily.json")
-            if not os.path.exists(path):
-                continue
+        guild_id = int(guild_folder)
+        path = os.path.join(base_folder, guild_folder, "daily.json")
+        if not os.path.exists(path):
+            continue
 
         from utils.reminder_storage import load_reminders
         reminders = load_reminders(guild_id, "daily")
