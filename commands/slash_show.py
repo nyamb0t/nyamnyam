@@ -26,7 +26,7 @@ async def shownumber(interaction: discord.Interaction):
         f"**VC**：{vc_info}\n"
         f"**転送チャンネル**：\n{text_info}"
     )
-    await interaction.response.send_message(message, ephemeral=True)
+    await interaction.response.send_message(message)
 
 # --- setup 関数（__init__.py から呼ばれる）
 async def setup(bot: discord.Client):
