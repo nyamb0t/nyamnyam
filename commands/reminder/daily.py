@@ -132,7 +132,7 @@ class DailyReminder(commands.Cog):
             cancel_daily_reminder(guild_id, r["time"], r["channel_id"], registered_jobs, REMINDER_TYPE)
 
         save_reminders(guild_id, REMINDER_TYPE, [])
-        await interaction.response.send_message("ぜーんぶ抹消しました！")
+        await interaction.response.send_message("ぼうけん の しょ が きえました ！")
         
 # --- Botにコマンド登録する setup 関数（クラスの外に！）
 async def setup(bot: discord.Client):
