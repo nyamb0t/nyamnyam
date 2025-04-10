@@ -16,13 +16,17 @@ def get_guild_file(guild_id):
     return os.path.join(DATA_DIR, f"{guild_id}_channels.json")
 
 # --- ギルドの設定ファイルを読み込む関数
-def load_guild_data(guild_id):
+def save_guild_data(guild_id, data):
     path = get_guild_file(guild_id)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    # ファイルがなければ初期データを返す
-    return {"text_channels": [], "vc_channel": None, "last_sent": {}}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    # --- ここから追加！ ---
+    backup_dir = "backup"
+    os.makedirs(backup_dir, exist_ok=True)
+    backup_path = os.path.join(backup_dir, f"{guild_id}_channels.json")
+    with open(backup_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 # --- ギルドの設定データを保存する関数
 def save_guild_data(guild_id, data):
