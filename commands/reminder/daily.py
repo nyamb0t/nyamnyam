@@ -97,4 +97,4 @@ class DailyReminder(commands.Cog):
 
 # --- このファイルをBotに読み込ませるための setup 関数（__init__.py から呼ばれる）
 def setup(bot):
-    bot.add_cog(DailyReminder(bot))
+        await bot.add_cog(DailyReminder(bot))
