@@ -26,7 +26,12 @@ class DailyReminder(commands.Cog):
         # 重複チェック
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
-                await interaction.followup.send("その時間とチャンネルにはもう設定されてるよ！")
+                await interaction.followup.send(
+                    f"その時間とチャンネルにはもう設定されてるよ！\n"
+                    f"‪‪❤︎‬ 時間：{time}\n"
+                    f"‪‪❤︎‬ チャンネル：{channel.mention}\n"
+                    f"‪‪❤︎‬ メッセージ：{r['message']}"
+                )
                 return
 
         # 保存
