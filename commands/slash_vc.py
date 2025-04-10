@@ -11,12 +11,15 @@ import re
 @app_commands.describe(vc_input="VCのID・メンション・URLのいずれかを指定してね")
 async def vcset(interaction: discord.Interaction, vc_input: str):
     guild = interaction.guild
-    match = re.search(r"\d{17,}", vc_input)  # 17桁以上の数字を抽出
-    if not match:
+
+    # --- すべての17桁以上の数字を抽出して、2番目（チャンネルID）を使う！
+    matches = re.findall(r"\d{17,}", vc_input)
+    if not matches:
         await interaction.response.send_message("チャンネルIDが読み取れなかったよ！", ephemeral=True)
         return
 
-    vc_id = int(match.group())
+    # ギルドID/チャンネルID の形式なら、2つめがチャンネルID
+    vc_id = int(matches[-1])
     vc_channel = guild.get_channel(vc_id)
 
     if not isinstance(vc_channel, discord.VoiceChannel):
