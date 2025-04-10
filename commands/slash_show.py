@@ -12,7 +12,7 @@ async def shownumber(interaction: discord.Interaction):
     # VCの設定確認
     vc_channel_id = data.get("vc_channel")
     vc_channel = interaction.guild.get_channel(vc_channel_id) if vc_channel_id else None
-    vc_info = f"\n　‪‪⋆　<‪‪#{vc_channel.id}>" if vc_channel else "　まだ設定されてないよ〜！"
+    vc_info = f"　‪‪⋆　<‪‪#{vc_channel_id}>" if vc_channel else "　まだ設定されてないよ〜！"
 
     # テキストチャンネルの設定確認
     text_channel_ids = data.get("text_channels", [])
@@ -24,7 +24,7 @@ async def shownumber(interaction: discord.Interaction):
     message = (
         f"**꒰ いまの設定 ꒱**\n"
         f"【VC】\n{vc_info}\n"
-        f"【転送チャンネル】\n{text_info}"
+        f"【部屋番】\n{text_info}"
     )
     await interaction.response.send_message(message)
 
