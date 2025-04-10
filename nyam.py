@@ -23,6 +23,29 @@ async def on_ready():
     await bot.tree.sync()  # スラッシュコマンドをここで同期！
     print(f"Logged in as {bot.user.name} ({bot.user.id})")
 
+    # --- Discordにファイル内容を送る（コメントアウトでON/OFF） ---
+    # await send_backup_to_discord()
+
+# --- バックアップを送る関数 ---
+async def send_backup_to_discord():
+    channel_id = 送信先チャンネルのIDをここに！  # 例: 944884833191084062
+    channel = bot.get_channel(channel_id)
+    if not channel:
+        print("送信先チャンネルが見つからなかった！")
+        return
+
+    for filename in os.listdir("backup"):
+        path = os.path.join("backup", filename)
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Discordのメッセージとして送る（長すぎたら省略）
+            if len(content) < 1900:
+                await channel.send(f"**{filename} の中身：**\n```json\n{content}\n```")
+            else:
+                await channel.send(f"**{filename}** の内容が長すぎて全部は送れなかったよ！")
+
 async def main():
     keep_alive()  # Flaskサーバー起動（Renderの死活監視用）
     await setup_commands(bot)  # コマンド登録
