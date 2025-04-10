@@ -12,19 +12,19 @@ async def shownumber(interaction: discord.Interaction):
     # VCの設定確認
     vc_channel_id = data.get("vc_channel")
     vc_channel = interaction.guild.get_channel(vc_channel_id) if vc_channel_id else None
-    vc_info = f"　‪‪⋆　<#{vc_channel.id}>" if vc_channel else "　ɴᴏᴛ ꜰᴏᴜɴᴅ..."
+    vc_info = f"　‪‪⋆ <#{vc_channel.id}>" if vc_channel else "　ɴᴏᴛ ꜰᴏᴜɴᴅ..."
 
     # テキストチャンネルの設定確認
     text_channel_ids = data.get("text_channels", [])
     if text_channel_ids:
-        text_info = "\n".join([f"‪‪　︎⋆　<#{ch_id}>" for ch_id in text_channel_ids])
+        text_info = "\n".join([f"‪‪　︎⋆ <#{ch_id}>" for ch_id in text_channel_ids])
     else:
         text_info = "　ɴᴏᴛ ꜰᴏᴜɴᴅ..."
 
     message = (
         f"** ⋆⸜ ꜱᴛᴀᴛᴜꜱ ⸝⋆ **\n"
-        f"【VC】\n{vc_info}\n"
-        f"【部屋番】\n{text_info}"
+        f" ᴠᴏɪᴄᴇ ᴄʜᴀᴛ\n{vc_info}\n"
+        f" ʀᴏᴏᴍ ɴᴜᴍʙᴇʀ\n{text_info}"
     )
     await interaction.response.send_message(message)
 
