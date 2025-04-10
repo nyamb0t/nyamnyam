@@ -24,11 +24,11 @@ async def on_ready():
     print(f"Logged in as {bot.user.name} ({bot.user.id})")
 
     # --- Discordにファイル内容を送る（コメントアウトでON/OFF） ---
-    # await send_backup_to_discord()
+    await send_backup_to_discord()
 
 # --- バックアップを送る関数 ---
 async def send_backup_to_discord():
-    #channel_id = 送信先チャンネルのIDをここに！  # 例: 944884833191084062
+    channel_id = 1359758903998415060 #送信先チャンネルのIDをここに！
     channel = bot.get_channel(channel_id)
     if not channel:
         print("送信先チャンネルが見つからなかった！")
