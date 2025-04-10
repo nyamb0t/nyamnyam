@@ -7,15 +7,15 @@ from utils.channel_storage import load_guild_data, save_guild_data
 import re
 
 # --- VC設定コマンド（/vcset）
-@app_commands.command(name="vcset", description="VCの名前変更対象を設定するよ！URLやメンションでもOK！")
-@app_commands.describe(vc_input="VCのID・メンション・URLのいずれかを指定してね")
+@app_commands.command(name="vcset", description="VC名に部屋番を反映できる")
+@app_commands.describe(vc_input="名前をかえるVC（ID･メンション･URL）")
 async def vcset(interaction: discord.Interaction, vc_input: str):
     guild = interaction.guild
 
     # --- すべての17桁以上の数字を抽出して、2番目（チャンネルID）を使う！
     matches = re.findall(r"\d{17,}", vc_input)
     if not matches:
-        await interaction.response.send_message("チャンネルIDが読み取れなかったよ！", ephemeral=True)
+        await interaction.response.send_message("チャンネルID読み取れなかった😿", ephemeral=True)
         return
 
     # ギルドID/チャンネルID の形式なら、2つめがチャンネルID
@@ -23,7 +23,7 @@ async def vcset(interaction: discord.Interaction, vc_input: str):
     vc_channel = guild.get_channel(vc_id)
 
     if not isinstance(vc_channel, discord.VoiceChannel):
-        await interaction.response.send_message("指定されたチャンネルはボイスチャンネルじゃないかも！", ephemeral=True)
+        await interaction.response.send_message("それVCじゃないかも", ephemeral=True)
         return
 
     data = load_guild_data(guild.id)
