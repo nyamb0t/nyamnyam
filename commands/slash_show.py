@@ -12,12 +12,12 @@ async def shownumber(interaction: discord.Interaction):
 
     # --- VCの表示（未設定ならその旨を表示）
     vc_channel = interaction.guild.get_channel(data.get("vc_channel")) if data.get("vc_channel") else None
-    vc_display = f"‪‪⋆ {vc_channel.name}" if vc_channel else "　まだ設定されてないよ！"
+    vc_display = f"‪‪　{vc_channel.name}" if vc_channel else "　まだ設定されてないよ！"
 
     # --- テキストチャンネルの表示（未設定ならその旨を表示）
     text_channels = data.get("text_channels", [])
     if text_channels:
-        text_display = "\n".join([f"‪‪⋆ <#{ch_id}>" for ch_id in text_channels])
+        text_display = "\n".join([f"‪‪　<#{ch_id}>" for ch_id in text_channels])
     else:
         text_display = "　まだ設定されてないよ！"
 
