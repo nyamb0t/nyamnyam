@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from keep_alive import keep_alive
 from commands import setup_commands
 from events.message_handler import setup as setup_message_handler
+from commands.reminder import setup_reminder_commands 
 import asyncio
 
 load_dotenv()
