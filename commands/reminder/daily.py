@@ -56,7 +56,7 @@ class DailyReminder(commands.Cog):
                 break
         else:
             # 重複していない場合のみ defer する（followupで送るよ〜って宣言）
-            await interaction.response.defer(ephemeral=True)
+            await interaction.response.defer()
 
         # --- 保存処理
         reminder = {"time": time, "message": message, "channel_id": channel.id}
