@@ -9,6 +9,7 @@ from keep_alive import keep_alive
 from commands import setup_commands
 from events.message_handler import setup as setup_message_handler
 from commands.reminder import setup_reminder_commands 
+from utils.scheduler import start_scheduler
 import asyncio
 
 load_dotenv()
@@ -56,6 +57,7 @@ async def main():
     await setup_commands(bot)         # スラッシュコマンドの登録
     await setup_message_handler(bot)  # 数字転送・VC名変更のイベント登録
     await setup_reminder_commands(bot)  # リマインダー機能
+    start_scheduler()
     await bot.start(TOKEN)
 
 if __name__ == "__main__":
