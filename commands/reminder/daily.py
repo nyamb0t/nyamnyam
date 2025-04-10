@@ -50,7 +50,7 @@ class DailyReminder(commands.Cog):
             if r["time"] == time and r["channel_id"] == channel.id:
                 view = ConfirmAddButton(self.bot, interaction, time, message, channel)
                 await interaction.response.send_message(
-                    f"その時間とチャンネルにはもう設定されてるよ！\n"
+                    f"同じ時間とチャンネルに先客がいます😭\n"
                     f"‪‪   {time} {channel.mention} ‪‪❤︎‬ {r['message']}"
                     "追加で登録する？",
                     view=view,
