@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from utils.channel_storage import load_guild_data
 
-@app_commands.command(name="shownumber", description="VCとチャンネルの設定状況を確認するよ！")
+@app_commands.command(name="shownumber", description="部屋番をおくるチャンネルとvcがみれる🔥")
 async def shownumber(interaction: discord.Interaction):
     guild_id = interaction.guild.id
     data = load_guild_data(guild_id)
