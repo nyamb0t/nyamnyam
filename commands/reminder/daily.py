@@ -43,7 +43,7 @@ class DailyReminder(commands.Cog):
                 view = ConfirmAddButton()
                 await interaction.response.send_message(
                     f"同じ時間とチャンネルに先客がいます😭\n"
-                    f"‪‪   {time} {channel.mention} ‪‪❤︎‬ {r['message']}\n"
+                    f"‪‪   {time} {channel.mention} ‪‪︎···▸﻿ {r['message']}\n"
                     f"追加で登録する？",
                     view=view,
                     ephemeral=True
@@ -66,15 +66,15 @@ class DailyReminder(commands.Cog):
         duplicates = [r for r in reminders if r["time"] == time and r["channel_id"] != channel.id]
         if duplicates:
             warning_lines = [
-                f"‪‪❤︎‬ {r['time']} <#{r['channel_id']}> - {r['message']}" for r in duplicates
+                f"‪‪   {r['time']} <#{r['channel_id']}> - {r['message']}" for r in duplicates
             ]
-            warning = "\n\n⚠ 同じ時間のmeowがあるよ₍˄. ̫.˄ ₎੭\n" + "\n".join(warning_lines)
+            warning = "\n\n!! 同じ時間のmeowがあるよ₍˄. ̫.˄ ₎੭\n" + "\n".join(warning_lines)
         else:
             warning = ""
 
         await interaction.followup.send(
             f"まいにちおしらせするね🐾\n"
-            f"   {time} {channel.mention} ❤︎‬ {message}"
+            f"   {time} {channel.mention} ···▸﻿ {message}"
             + warning
         )
 
@@ -96,18 +96,18 @@ class DailyReminder(commands.Cog):
         cancel_daily_reminder(guild_id, time, channel.id, registered_jobs, REMINDER_TYPE)
 
         await interaction.followup.send(
-            f"このmeowをけしたよ！\n   {time} {channel.mention} ‪‪❤︎‬ {target['message']}"
+            f"このᴍᴇᴏᴡをけしたよ！\n   {time} {channel.mention} ‪‪···▸﻿ {target['message']}"
         )
 
     @app_commands.command(name="showdaily", description="毎日のおしらせ予定が一覧でみれる")
     async def show_daily(self, interaction: discord.Interaction):
         reminders = load_reminders(interaction.guild.id, REMINDER_TYPE)
         if not reminders:
-            await interaction.response.send_message("おしらせの予定は0️⃣です！")
+            await interaction.response.send_message("꒰ིྀ  ᴍᴇᴏᴡ ʟɪꜱᴛ  ꒱ ིྀ\n    おしらせ予定はありません🐾")
             return
 
-        lines = [f"‪‪❤︎‬ {r['time']} <#{r['channel_id']}> - {r['message']}" for r in reminders]
-        await interaction.response.send_message("**꒰ིྀ mnow list ꒱ིྀ**\n" + "\n".join(lines))
+        lines = [f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in reminders]
+        await interaction.response.send_message("꒰ིྀ  ᴍᴇᴏᴡ ʟɪꜱᴛ  ꒱ ིྀ\n" + "\n".join(lines))
 
     @app_commands.command(name="cleardaily", description="毎日のおしらせを全部なくす")
     async def clear_daily(self, interaction: discord.Interaction):
