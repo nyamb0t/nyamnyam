@@ -49,7 +49,10 @@ class DailyReminder(commands.Cog):
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
                 view = ConfirmAddButton(self.bot, interaction, time, message, channel)
-                await interaction.response.send_message(
+                
+                await interaction.response.defer(ephemeral=True)  # ここで余裕を持たせる
+                # ボタン付きメッセージを送信
+                await interaction.followup.send(
                     f"同じ時間とチャンネルに先客がいます😭\n"
                     f"‪‪   {time} {channel.mention} ‪‪❤︎‬ {r['message']}"
                     "追加で登録する？",
