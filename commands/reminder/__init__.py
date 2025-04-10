@@ -3,5 +3,5 @@
 
 from . import daily
 
-async def setup_render_commands(bot):
+async def setup_reminder_commands(bot):
     await bot.add_cog(daily.DailyReminder(bot))
