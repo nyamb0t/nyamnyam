@@ -47,4 +47,4 @@ async def chdelete(interaction: discord.Interaction, channel: discord.TextChanne
 async def setup(bot: discord.Client):
     bot.tree.add_command(chset)
     bot.tree.add_command(chdelete)
-    await bot.tree.sync()  # コマンドをDiscordに同期！
+    # await bot.tree.sync()  # コマンドをDiscordに同期！
