@@ -45,4 +45,4 @@ async def vcdelete(interaction: discord.Interaction):
 async def setup(bot: discord.Client):
     bot.tree.add_command(vcset)
     bot.tree.add_command(vcdelete)
-    await bot.tree.sync()  # Discord にコマンドを同期
+    # await bot.tree.sync()  # Discord にコマンドを同期
