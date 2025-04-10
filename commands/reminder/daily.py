@@ -126,10 +126,10 @@ async def reload_all_daily_reminders(bot):
             if not guild_folder.isdigit():
                 continue  # フォルダ名が数字じゃない（.gitkeepなど）はスキップ！
 
-        guild_id = int(guild_folder)
-        path = os.path.join(base_folder, guild_folder, "daily.json")
-        if not os.path.exists(path):
-            continue
+            guild_id = int(guild_folder)
+            path = os.path.join(base_folder, guild_folder, "daily.json")
+            if not os.path.exists(path):
+                continue
 
         from utils.reminder_storage import load_reminders
         reminders = load_reminders(guild_id, "daily")
