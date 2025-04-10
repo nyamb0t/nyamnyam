@@ -2,6 +2,7 @@
 # --- リマインダー機能の「時間管理」部分！
 #     毎日・一度きりのメッセージを、指定時刻にちゃんと送れるようにする仕組み！
 
+from pytz import timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -13,7 +14,8 @@ scheduler = AsyncIOScheduler()
 # --- 毎日リマインダーを登録する関数
 def schedule_daily_reminder(bot, guild_id, time, message, channel_id, jobs, reminder_type):
     hour, minute = map(int, time.split(":"))  # 時刻（"09:00"）を数字に変換
-    trigger = CronTrigger(hour=hour, minute=minute)  # 毎日同じ時間に起動するトリガー
+    jst = timezone('Asia/Tokyo')　# 日本時間にする
+trigger = CronTrigger(hour=hour, minute=minute, timezone=jst)  # 毎日同じ時間に起動するトリガー
 
     job_id = f"{reminder_type}_{guild_id}_{channel_id}_{time}"  # ユニークなIDで管理
 
