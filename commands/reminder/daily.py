@@ -110,6 +110,7 @@ class DailyReminder(commands.Cog):
 # --- Botにコマンド登録する setup 関数（クラスの外に！）
 async def setup(bot: discord.Client):
     await bot.add_cog(DailyReminder(bot))
+    await reload_all_daily_reminders(bot)
     
 # --- Bot起動時にすべてのリマインダーを再登録する
 async def reload_all_daily_reminders(bot):
