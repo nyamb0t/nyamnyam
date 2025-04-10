@@ -49,19 +49,18 @@ class DailyReminder(commands.Cog):
                 f"‪‪❤︎‬ {r['time']} <#{r['channel_id']}> - {r['message']}"
                 for r in duplicates
             ]
-            warning = "\n\n⚠️ 同じ時間に他のチャンネルにもリマインダーがあるよ！\n" + "\n".join(warning_lines)
+            warning = "\n\n⚠️ 同じ時間のmeowがあるよ🐾重複してないかみてみて\n" + "\n".join(warning_lines)
         else:
             warning = ""
         
         # --- 設定完了のメッセージと一緒に送信
         await interaction.followup.send(
-            f"{time} に毎日リマインダー送るように設定したよ！\n"
+            f"まいにちおしらせするね！\n"
+            f"❤︎‬ 時間：{time}\n"
             f"‪‪❤︎‬ チャンネル：{channel.mention}\n"
             f"‪‪❤︎‬ メッセージ：{message}"
             + warning
         )
-
-        await interaction.followup.send(f"まいにちおしらせするね！\n時間:{time}\n{channel.mention}\n{r['message']}")
 
     # --- /deletedaily 00:00 [チャンネル]
     @app_commands.command(name="deletedaily", description="特定のリマインダーを削除するよ")
