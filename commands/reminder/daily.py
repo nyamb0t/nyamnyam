@@ -123,8 +123,8 @@ async def reload_all_daily_reminders(bot):
         return
 
         for guild_folder in os.listdir(base_folder):
-        if not guild_folder.isdigit():
-            continue  # フォルダ名が数字じゃない（.gitkeepなど）はスキップ！
+            if not guild_folder.isdigit():
+                continue  # フォルダ名が数字じゃない（.gitkeepなど）はスキップ！
 
         guild_id = int(guild_folder)
         path = os.path.join(base_folder, guild_folder, "daily.json")
