@@ -33,13 +33,12 @@ class DailyReminder(commands.Cog):
 
     @app_commands.command(name="setdaily", description="毎日決まった時間におしらせする")
     @app_commands.describe(time="時間（例: 10:27）", channel="おくるチャンネル", message="おくるメッセージ")
-    async def set_daily(self, interaction: discord.Interaction, time: str, message: str, channel: discord.TextChannel = None):
+        async def set_daily(self, interaction: discord.Interaction, time: str, message: str, channel: discord.TextChannel = None):
         guild_id = interaction.guild.id
         channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
-        
-        await interaction.response.defer(ephemeral=True)
 
+        # --- 重複チェックしてボタンで確認させる
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
                 view = ConfirmAddButton()
@@ -55,16 +54,19 @@ class DailyReminder(commands.Cog):
                 if view.value is None or view.value is False or timeout:
                     return
                 break
+        else:
+            # 重複していない場合のみ defer する（followupで送るよ〜って宣言）
+            await interaction.response.defer(ephemeral=True)
 
-        # 保存
+        # --- 保存処理
         reminder = {"time": time, "message": message, "channel_id": channel.id}
         reminders.append(reminder)
         save_reminders(guild_id, REMINDER_TYPE, reminders)
 
-        # スケジュール登録
+        # --- スケジューリング
         schedule_daily_reminder(self.bot, guild_id, time, message, channel.id, registered_jobs, REMINDER_TYPE)
 
-        # 別チャンネルに同じ時間のリマインダーがあるかチェック
+        # --- 同じ時間の他チャンネルへの通知チェック
         duplicates = [r for r in reminders if r["time"] == time and r["channel_id"] != channel.id]
         if duplicates:
             warning_lines = [
