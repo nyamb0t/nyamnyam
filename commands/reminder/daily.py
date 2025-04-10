@@ -66,7 +66,7 @@ class DailyReminder(commands.Cog):
         duplicates = [r for r in reminders if r["time"] == time and r["channel_id"] != channel.id]
         if duplicates:
             warning_lines = [
-                f"‪‪   {r['time']} <#{r['channel_id']}> - {r['message']}" for r in duplicates
+                f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in duplicates
             ]
             warning = "\n\n!! 同じ時間のmeowがあるよ₍˄. ̫.˄ ₎੭\n" + "\n".join(warning_lines)
         else:
@@ -106,7 +106,7 @@ class DailyReminder(commands.Cog):
             await interaction.response.send_message("꒰ིྀ  ᴍᴇᴏᴡ ʟɪꜱᴛ  ꒱ ིྀ\n    おしらせ予定はありません🐾")
             return
 
-        lines = [f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in reminders]
+        lines = [f"‪‪    {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in reminders]
         await interaction.response.send_message("꒰ིྀ  ᴍᴇᴏᴡ ʟɪꜱᴛ  ꒱ ིྀ\n" + "\n".join(lines))
 
     @app_commands.command(name="cleardaily", description="毎日のおしらせを全部なくす")
