@@ -1,11 +1,7 @@
-# commands/reminder/__init__.py
-# --- 毎日リマインダー・一度きりリマインダーのコマンドをまとめてBotに登録する場所！
-#     ここでそれぞれの setup を呼び出して準備するよ！
+# commands/render/__init__.py
+# --- render/daily.py のコマンドをBotに登録するためのファイル！
 
-from . import daily  # 毎日リマインダーの処理が入ってる
-from . import one_time  # 一回きりのリマインダー処理
+from . import daily
 
-# この関数は setup_commands(bot) の中から呼ばれて、リマインダー関係をすべてBotに登録する！
-async def setup_reminder(bot):
-    await daily.setup(bot)       # 毎日リマインダーのコマンドを登録
-    await one_time.setup(bot)    # 一度きりリマインダーのコマンドを登録
+async def setup_render_commands(bot):
+    await bot.add_cog(daily.DailyReminder(bot))
