@@ -41,6 +41,25 @@ class DailyReminder(commands.Cog):
 
         # スケジュール登録
         schedule_daily_reminder(self.bot, guild_id, time, message, channel.id, registered_jobs, REMINDER_TYPE)
+        
+        # --- 同じ時間の別チャンネルのリマインダーがあるかチェック
+        duplicates = [r for r in reminders if r["time"] == time and r["channel_id"] != channel.id]
+        if duplicates:
+            warning_lines = [
+                f"‪‪❤︎‬ {r['time']} <#{r['channel_id']}> - {r['message']}"
+                for r in duplicates
+            ]
+            warning = "\n\n⚠️ 同じ時間に他のチャンネルにもリマインダーがあるよ！\n" + "\n".join(warning_lines)
+        else:
+            warning = ""
+        
+        # --- 設定完了のメッセージと一緒に送信
+        await interaction.followup.send(
+            f"{time} に毎日リマインダー送るように設定したよ！\n"
+            f"‪‪❤︎‬ チャンネル：{channel.mention}\n"
+            f"‪‪❤︎‬ メッセージ：{message}"
+            + warning
+        )
 
         await interaction.followup.send(f"まいにちおしらせするね！\n時間:{time}\n{channel.mention}\n{r['message']}")
 
