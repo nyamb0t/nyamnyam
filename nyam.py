@@ -54,6 +54,7 @@ async def main():
     keep_alive()
     await setup_commands(bot)         # スラッシュコマンドの登録
     await setup_message_handler(bot)  # 数字転送・VC名変更のイベント登録
+    await setup_render_commands(bot)  # リマインダー機能
     await bot.start(TOKEN)
 
 if __name__ == "__main__":
