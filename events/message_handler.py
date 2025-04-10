@@ -49,11 +49,17 @@ class MessageHandler(commands.Cog):
 
         # --- VCの名前を変更
         vc_id = data.get("vc_channel")
+        print(f"DEBUG: vc_id = {vc_id}")
+        
         if vc_id:
             vc_channel = self.bot.get_channel(vc_id)
+            print(f"DEBUG: vc_channel = {vc_channel}")  # ← ここ追加！
+            print(f"DEBUG: vc_channel name = {vc_channel.name}")
+            
             if isinstance(vc_channel, discord.VoiceChannel):
                 # すでに同じ番号が入ってるなら変更不要
                 if f"【{number}】" in vc_channel.name:
+                    print("DEBUG: すでに同じ番号が入ってるから変更しないよ")
                     return
 
                 # もともと別の数字が入ってる場合は置き換える、それ以外はつける
@@ -61,7 +67,8 @@ class MessageHandler(commands.Cog):
                     new_name = re.sub(r"【\d{5}】", f"【{number}】", vc_channel.name)
                 else:
                     new_name = f"{vc_channel.name} 【{number}】"
-
+                    
+                    print(f"DEBUG: VC名を {new_name} に変更するよ")
                 await vc_channel.edit(name=new_name)
 
 # --- このイベントをBotに登録する setup 関数
