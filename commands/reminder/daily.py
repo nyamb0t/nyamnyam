@@ -82,25 +82,51 @@ class DailyReminder(commands.Cog):
             + warning
         )
 
-    @app_commands.command(name="deletedaily", description="毎日のおしらせをやめる")
-    @app_commands.describe(time="時間（例: 10:27）", channel="設定してたチャンネル")
-    async def delete_daily(self, interaction: discord.Interaction, time: str, channel: discord.TextChannel = None):
+        @app_commands.command(name="deletedaily", description="毎日のおしらせをやめる")
+    @app_commands.describe(time="時間（例: 10:27）")
+    async def delete_daily(self, interaction: discord.Interaction, time: str):
         await interaction.response.defer()
         guild_id = interaction.guild.id
-        channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
 
-        target = next((r for r in reminders if r["time"] == time and r["channel_id"] == channel.id), None)
-        if not target:
-            await interaction.followup.send("時間かチャンネルまちがえてないかな。。？")
+        # 該当時間のリマインダーを抽出
+        targets = [r for r in reminders if r["time"] == time]
+        if not targets:
+            await interaction.followup.send("その時間のᴍᴇᴏᴡはみつからなかったよ〜^ㅜ.ㅜ^")
             return
 
-        new_reminders = [r for r in reminders if r != target]
-        save_reminders(guild_id, REMINDER_TYPE, new_reminders)
-        cancel_daily_reminder(guild_id, time, channel.id, registered_jobs, REMINDER_TYPE)
+        # ボタン付きビューを作成
+        class ReminderDeleteView(discord.ui.View):
+            def __init__(self, reminders_list):
+                super().__init__(timeout=60)
+                self.reminders_list = reminders_list
 
+                for idx, reminder in enumerate(reminders_list):
+                    label = f"{reminder['time']} - <#{reminder['channel_id']}>"
+                    self.add_item(self.ReminderButton(label, idx))
+
+            class ReminderButton(discord.ui.Button):
+                def __init__(self, label, index):
+                    super().__init__(label=label, style=discord.ButtonStyle.danger)
+                    self.index = index
+
+                async def callback(self, interaction: discord.Interaction):
+                    reminder = self.view.reminders_list[self.index]
+                    # 削除処理
+                    updated = [r for r in load_reminders(guild_id, REMINDER_TYPE) if r != reminder]
+                    save_reminders(guild_id, REMINDER_TYPE, updated)
+                    cancel_daily_reminder(guild_id, reminder["time"], reminder["channel_id"], registered_jobs, REMINDER_TYPE)
+                    await interaction.response.send_message(
+                        f"このᴍᴇᴏᴡをけしたよ！\n   {reminder['time']} <#{reminder['channel_id']}> ···▸﻿ {reminder['message']}",
+                        ephemeral=True
+                    )
+                    self.view.stop()
+
+        view = ReminderDeleteView(targets)
+        lines = [f"{r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in targets]
         await interaction.followup.send(
-            f"このᴍᴇᴏᴡをけしたよ！\n   {time} {channel.mention} ‪‪···▸﻿ {target['message']}"
+            "**削除したいmeowを選んでね！**\n" + "\n".join(lines),
+            view=view
         )
 
     @app_commands.command(name="showdaily", description="毎日のおしらせ予定が一覧でみれる")
