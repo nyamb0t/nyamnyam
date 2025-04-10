@@ -83,3 +83,10 @@ class DailyReminder(commands.Cog):
 
         save_reminders(guild_id, REMINDER_TYPE, [])
         await interaction.response.send_message("すべて削除したよ〜！")
+        
+    # --- Botにコマンド登録する setup 関数
+    async def setup(bot):
+        bot.tree.add_command(setdaily)
+        bot.tree.add_command(deletedaily)
+        bot.tree.add_command(showdaily)
+        bot.tree.add_command(cleardaily)
