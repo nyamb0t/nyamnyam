@@ -21,7 +21,7 @@ class MessageHandler(commands.Cog):
         guild_id = message.guild.id
         data = load_guild_data(guild_id)
 
-        # --- 5桁の数字を検出
+        # --- 5桁または6桁の数字を検出
         match = re.search(r"\b\d{5,6}\b", message.content)
         if not match:
             return
