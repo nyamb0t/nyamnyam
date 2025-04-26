@@ -24,7 +24,8 @@ async def renameset(interaction: discord.Interaction, channel_input: str):
     if not isinstance(target_channel, (discord.VoiceChannel, discord.TextChannel)):
         await interaction.response.send_message("それVCでもテキストチャンネルでもないかも", ephemeral=True)
         return
-
+        
+    data = load_guild_data(guild.id)
     rename_channels = data.get("rename_channels", [])  # ← "rename_channels"キーのリストを取る（なければ空リスト）
     
     if target_channel.id in rename_channels:
