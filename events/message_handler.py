@@ -48,31 +48,30 @@ class MessageHandler(commands.Cog):
                 await channel.send(number)
 
         # --- VCまたはテキストチャンネルの名前を変更
-        channel_id = data.get("rename_channels")
-        print(f"DEBUG: channel_id = {channel_id}")
-        
-        if channel_id:
+        rename_channels = data.get("rename_channels", [])
+        for channel_id in rename_channels:
             target_channel = self.bot.get_channel(channel_id)
             print(f"DEBUG: target_channel = {target_channel}")
             
             if target_channel:
                 print(f"DEBUG: target_channel name = {target_channel.name}")
                 print(f"DEBUG: target_channel type = {type(target_channel)}")
-            
-            if isinstance(target_channel, (discord.VoiceChannel, discord.TextChannel)):
-                # すでに同じ番号が入ってるなら変更不要
-                if f"【{number}】" in target_channel.name:
-                    print("DEBUG: すでに同じ番号が入ってるから変更しないよ")
-                    return
+                
+                if isinstance(target_channel, (discord.VoiceChannel, discord.TextChannel)):
                     
-                # もともと別の数字が入ってる場合は置き換える、それ以外はつける
-                if re.search(r"【\d{5,6}】", target_channel.name):
-                    new_name = re.sub(r"【\d{5,6}】", f"【{number}】", target_channel.name)
-                else:
-                    new_name = f"{target_channel.name} 【{number}】"
+                    # すでに同じ番号が入ってるなら変更不要
+                    if f"【{number}】" in target_channel.name:
+                        print("DEBUG: すでに同じ番号が入ってるから変更しないよ")
+                        continue  # ←ここはreturnじゃなくてcontinueにする！！！
                         
-                print(f"DEBUG: チャンネル名を {new_name} に変更するよ")
-                await target_channel.edit(name=new_name)
+                        # もともと別の数字が入ってる場合は置き換える、それ以外はつける
+                        if re.search(r"【\d{5,6}】", target_channel.name):
+                            new_name = re.sub(r"【\d{5,6}】", f"【{number}】", target_channel.name)
+                        else:
+                            new_name = f"{target_channel.name} 【{number}】"
+                            
+                        print(f"DEBUG: チャンネル名を {new_name} に変更するよ")
+                         await target_channel.edit(name=new_name)
 
 # --- このイベントをBotに登録する setup 関数
 async def setup(bot):
