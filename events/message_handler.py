@@ -48,7 +48,7 @@ class MessageHandler(commands.Cog):
                 await channel.send(number)
 
         # --- VCまたはテキストチャンネルの名前を変更
-        channel_id = data.get("rename_channel")
+        channel_id = data.get("rename_channels")
         print(f"DEBUG: channel_id = {channel_id}")
         
         if channel_id:
