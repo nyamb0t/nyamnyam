@@ -64,14 +64,14 @@ class MessageHandler(commands.Cog):
                         print("DEBUG: すでに同じ番号が入ってるから変更しないよ")
                         continue  # ←ここはreturnじゃなくてcontinueにする！！！
                         
-                        # もともと別の数字が入ってる場合は置き換える、それ以外はつける
-                        if re.search(r"【\d{5,6}】", target_channel.name):
-                            new_name = re.sub(r"【\d{5,6}】", f"【{number}】", target_channel.name)
-                        else:
-                            new_name = f"{target_channel.name} 【{number}】"
+                    # もともと別の数字が入ってる場合は置き換える、それ以外はつける
+                    if re.search(r"【\d{5,6}】", target_channel.name):
+                        new_name = re.sub(r"【\d{5,6}】", f"【{number}】", target_channel.name)
+                    else:
+                        new_name = f"{target_channel.name} 【{number}】"
                             
-                        print(f"DEBUG: チャンネル名を {new_name} に変更するよ")
-                         await target_channel.edit(name=new_name)
+                    print(f"DEBUG: チャンネル名を {new_name} に変更するよ")
+                    await target_channel.edit(name=new_name)
 
 # --- このイベントをBotに登録する setup 関数
 async def setup(bot):
