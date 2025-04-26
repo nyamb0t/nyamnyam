@@ -47,7 +47,7 @@ async def renamedelete(interaction: discord.Interaction):
     data = load_guild_data(guild_id)  # サーバーの設定ファイルを読み込む
 
     # --- リネーム設定を消す（Noneにする）
-    data["rename_channel"] = None
+    data["rename_channel"] = []
     save_guild_data(guild_id, data)
 
     # --- 完了メッセージを送信
