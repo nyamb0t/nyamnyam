@@ -22,7 +22,7 @@ class MessageHandler(commands.Cog):
         data = load_guild_data(guild_id)
 
         # --- 5桁の数字を検出
-        match = re.search(r"\b\d{5}\b", message.content)
+        match = re.search(r"\b\d{5,6}\b", message.content)
         if not match:
             return
 
@@ -63,8 +63,8 @@ class MessageHandler(commands.Cog):
                     return
 
                 # もともと別の数字が入ってる場合は置き換える、それ以外はつける
-                if re.search(r"【\d{5}】", vc_channel.name):
-                    new_name = re.sub(r"【\d{5}】", f"【{number}】", vc_channel.name)
+                if re.search(r"【\d{5,6}】", vc_channel.name):
+                    new_name = re.sub(r"【\d{5,6}】", f"【{number}】", vc_channel.name)
                 else:
                     new_name = f"{vc_channel.name} 【{number}】"
                     
