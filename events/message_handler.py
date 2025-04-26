@@ -53,8 +53,11 @@ class MessageHandler(commands.Cog):
         
         if vc_id:
             vc_channel = self.bot.get_channel(vc_id)
-            print(f"DEBUG: vc_channel = {vc_channel}")  # ← ここ追加！
-            print(f"DEBUG: vc_channel name = {vc_channel.name}")
+            print(f"DEBUG: vc_channel = {vc_channel}")
+            
+            if vc_channel:
+                print(f"DEBUG: vc_channel name = {vc_channel.name}")
+                print(f"DEBUG: vc_channel type = {type(vc_channel)}")
             
             if isinstance(vc_channel, discord.VoiceChannel):
                 # すでに同じ番号が入ってるなら変更不要
