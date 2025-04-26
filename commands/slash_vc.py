@@ -50,8 +50,7 @@ async def renamedelete(interaction: discord.Interaction):
     data["rename_channel"] = []
     save_guild_data(guild_id, data)
 
-    # --- 完了メッセージを送信
-    await interaction.response.send_message("チャンネル名変えるのやめるね❕おつかれさま〜", ephemeral=True)
+    await interaction.response.send_message("リネーム対象のチャンネル設定を全部消したよ！", ephemeral=True)
 
 # --- Botにコマンド登録する setup 関数（__init__.py から呼び出される想定）
 async def setup(bot: discord.Client):
