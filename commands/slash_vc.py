@@ -25,18 +25,18 @@ async def renameset(interaction: discord.Interaction, channel_input: str):
         await interaction.response.send_message("それVCでもテキストチャンネルでもないかも", ephemeral=True)
         return
 
-    # --- データファイルを読み込んで、すでに登録されているかチェック
-    data = load_guild_data(guild.id)
-    if data.get("rename_channel") == target_channel.id:
-        await interaction.response.send_message(f"{target_channel.name} はもう追加済みだよ〜", ephemeral=True)
+    rename_channels = data.get("rename_channels", [])  # ← "rename_channels"キーのリストを取る（なければ空リスト）
+    
+    if target_channel.id in rename_channels:
+        await interaction.response.send_message(f"{target_channel.name} はもう登録されてるよ〜", ephemeral=True)
         return
-
-    # --- 登録されてなかったら保存する
-    data["rename_channel"] = target_channel.id
-    save_guild_data(guild.id, data)
-
-    # --- 完了メッセージを送信
-    await interaction.response.send_message(f"{target_channel.name} に部屋番反映させるね♩", ephemeral=True)
+    
+    rename_channels.append(target_channel.id)  # リストに追加！
+    
+    data["rename_channels"] = rename_channels  # データに上書き保存
+    save_guild_data(guild.id, data)  # 保存！
+    
+    await interaction.response.send_message(f"{target_channel.name} をリネーム対象に追加したよ♩", ephemeral=True)
 
 # --- リネーム設定解除コマンド（/renamedelete）
 # 登録したチャンネル設定を解除する
