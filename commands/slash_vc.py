@@ -39,20 +39,47 @@ async def renameset(interaction: discord.Interaction, channel_input: str):
     
     await interaction.response.send_message(f"{target_channel.name} をリネーム対象に追加したよ♩", ephemeral=True)
 
-# --- リネーム設定解除コマンド（/renamedelete）
-# 登録したチャンネル設定を解除する
-@app_commands.command(name="renamedelete", description="チャンネル名変更設定を解除するよ")
-async def renamedelete(interaction: discord.Interaction):
-    guild_id = interaction.guild.id  # サーバーIDを取得
-    data = load_guild_data(guild_id)  # サーバーの設定ファイルを読み込む
 
-    # --- リネーム設定を消す（Noneにする）
-    data["rename_channel"] = []
+# --- リネーム設定からチャンネルを1個だけ削除するコマンド（/renamedelete）
+@app_commands.command(name="renamedelete", description="リネーム対象からチャンネルを1個だけ削除するよ")
+@app_commands.describe(channel_input="削除するチャンネル（ID･メンション･URL）")
+async def renamedelete(interaction: discord.Interaction, channel_input: str):
+    guild = interaction.guild
+
+    matches = re.findall(r"\d{17,}", channel_input)
+    if not matches:
+        await interaction.response.send_message("チャンネルID読み取れなかった😿", ephemeral=True)
+        return
+
+    channel_id = int(matches[-1])
+
+    data = load_guild_data(guild.id)
+    rename_channels = data.get("rename_channels", [])
+
+    if channel_id not in rename_channels:
+        await interaction.response.send_message("そのチャンネルは登録されてないよ〜", ephemeral=True)
+        return
+
+    # --- リストから削除する
+    rename_channels.remove(channel_id)
+    data["rename_channels"] = rename_channels
+    save_guild_data(guild.id, data)
+
+    await interaction.response.send_message("チャンネルをリネーム対象から削除したよ！", ephemeral=True)
+
+# --- リネーム対象を全部まとめて削除するコマンド（/renameclear）
+@app_commands.command(name="renameclear", description="リネーム対象を全部削除するよ")
+async def renameclear(interaction: discord.Interaction):
+    guild_id = interaction.guild.id
+    data = load_guild_data(guild_id)
+
+    data["rename_channels"] = []
     save_guild_data(guild_id, data)
 
-    await interaction.response.send_message("リネーム対象のチャンネル設定を全部消したよ！", ephemeral=True)
+    await interaction.response.send_message("リネーム対象のチャンネルを全部削除したよ！", ephemeral=True)
 
 # --- Botにコマンド登録する setup 関数（__init__.py から呼び出される想定）
 async def setup(bot: discord.Client):
-    bot.tree.add_command(renameset)    # /renameset コマンドを登録
-    bot.tree.add_command(renamedelete) # /renamedelete コマンドを登録
+    bot.tree.add_command(renameset)     # /renameset コマンドを登録
+    bot.tree.add_command(renamedelete)  # /renamedelete コマンドを登録
+    bot.tree.add_command(renameclear)   # /renameclear コマンドも登録
