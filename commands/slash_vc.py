@@ -1,51 +1,58 @@
-# commands/slash_vc.py
-# --- スラッシュコマンドでVCの名前変更用チャンネルを設定・解除するコマンド定義ファイル！
-
 import discord
 from discord import app_commands
 from utils.channel_storage import load_guild_data, save_guild_data
 import re
 
-# --- VC設定コマンド（/vcset）
-@app_commands.command(name="vcset", description="VC名に部屋番を反映できる")
-@app_commands.describe(vc_input="名前をかえるVC（ID･メンション･URL）")
-async def vcset(interaction: discord.Interaction, vc_input: str):
-    guild = interaction.guild
+# --- チャンネルリネーム設定コマンド（/renameset）
+# チャンネルID・メンション・URLを受け取って、リネーム対象として登録する
+@app_commands.command(name="renameset", description="チャンネル名に部屋番を反映できる")
+@app_commands.describe(channel_input="名前をかえるチャンネル（ID･メンション･URL）")
+async def renameset(interaction: discord.Interaction, channel_input: str):
+    guild = interaction.guild  # コマンドを送ったサーバー情報を取得
 
-    # --- すべての17桁以上の数字を抽出して、2番目（チャンネルID）を使う！
-    matches = re.findall(r"\d{17,}", vc_input)
+    # --- 入力された文字列から、17桁以上の数字（DiscordのID）を探す
+    matches = re.findall(r"\d{17,}", channel_input)
     if not matches:
         await interaction.response.send_message("チャンネルID読み取れなかった😿", ephemeral=True)
         return
 
-    # ギルドID/チャンネルID の形式なら、2つめがチャンネルID
-    vc_id = int(matches[-1])
-    vc_channel = guild.get_channel(vc_id)
+    # --- 最後に見つかった数字をチャンネルIDとして使う
+    channel_id = int(matches[-1])
+    target_channel = guild.get_channel(channel_id)  # サーバー内からそのIDのチャンネルを探す
 
-    if not isinstance(vc_channel, discord.VoiceChannel):
-        await interaction.response.send_message("それVCじゃないかも", ephemeral=True)
+    # --- チャンネルの型チェック（ボイスチャンネル or テキストチャンネルのみOK）
+    if not isinstance(target_channel, (discord.VoiceChannel, discord.TextChannel)):
+        await interaction.response.send_message("それVCでもテキストチャンネルでもないかも", ephemeral=True)
         return
 
+    # --- データファイルを読み込んで、すでに登録されているかチェック
     data = load_guild_data(guild.id)
-    if data.get("vc_channel") == vc_channel.id:
-        await interaction.response.send_message(f"{vc_channel.name} はもう追加済みだよ〜", ephemeral=True)
+    if data.get("rename_channel") == target_channel.id:
+        await interaction.response.send_message(f"{target_channel.name} はもう追加済みだよ〜", ephemeral=True)
         return
 
-    data["vc_channel"] = vc_channel.id
+    # --- 登録されてなかったら保存する
+    data["rename_channel"] = target_channel.id
     save_guild_data(guild.id, data)
-    await interaction.response.send_message(f"{vc_channel.name} に部屋番反映させるね♩", ephemeral=True)
 
-# --- VC解除コマンド（/vcdelete）
-@app_commands.command(name="vcdelete", description="VCの名前変更設定を解除するよ")
-async def vcdelete(interaction: discord.Interaction):
-    guild_id = interaction.guild.id
-    data = load_guild_data(guild_id)
-    data["vc_channel"] = None
+    # --- 完了メッセージを送信
+    await interaction.response.send_message(f"{target_channel.name} に部屋番反映させるね♩", ephemeral=True)
+
+# --- リネーム設定解除コマンド（/renamedelete）
+# 登録したチャンネル設定を解除する
+@app_commands.command(name="renamedelete", description="チャンネル名変更設定を解除するよ")
+async def renamedelete(interaction: discord.Interaction):
+    guild_id = interaction.guild.id  # サーバーIDを取得
+    data = load_guild_data(guild_id)  # サーバーの設定ファイルを読み込む
+
+    # --- リネーム設定を消す（Noneにする）
+    data["rename_channel"] = None
     save_guild_data(guild_id, data)
-    await interaction.response.send_message("VCの名前変えるのやめるね❕おつかれさま〜", ephemeral=True)
 
-# --- Botにコマンド登録する setup 関数（__init__.py から呼び出す）
+    # --- 完了メッセージを送信
+    await interaction.response.send_message("チャンネル名変えるのやめるね❕おつかれさま〜", ephemeral=True)
+
+# --- Botにコマンド登録する setup 関数（__init__.py から呼び出される想定）
 async def setup(bot: discord.Client):
-    bot.tree.add_command(vcset)
-    bot.tree.add_command(vcdelete)
-    # await bot.tree.sync()  # Discord にコマンドを同期
+    bot.tree.add_command(renameset)    # /renameset コマンドを登録
+    bot.tree.add_command(renamedelete) # /renamedelete コマンドを登録
