@@ -62,7 +62,7 @@ class MessageHandler(commands.Cog):
                     # すでに同じ番号が入ってるなら変更不要
                     if f"【{number}】" in target_channel.name:
                         print("DEBUG: すでに同じ番号が入ってるから変更しないよ")
-                        continue  # ←ここはreturnじゃなくてcontinueにする！！！
+                        continue  # ←ここはreturnじゃなくてcontinueにする！！
                         
                     # もともと別の数字が入ってる場合は置き換える、それ以外はつける
                     if re.search(r"【\d{5,6}】", target_channel.name):
