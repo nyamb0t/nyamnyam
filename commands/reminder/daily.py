@@ -44,7 +44,6 @@ class DailyReminder(commands.Cog):
         # --- 重複チェック（同じ時間・同じチャンネル）
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
-                await interaction.response.defer(ephemeral=True)  # ★スラッシュコマンド受付に即返信
                 
                 warning_message = (
                     f"同じ時間とチャンネルに先客がいます🐱\n"
