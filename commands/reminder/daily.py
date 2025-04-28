@@ -14,18 +14,17 @@ class ConfirmAddButton(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=60)
         self.value = None
-        self.temp_message = None  # 仮のメッセージを保存する変数を追加！
 
     @discord.ui.button(label="ʏᴇꜱ", style=discord.ButtonStyle.success)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = True
-        self.temp_message = await interaction.response.send_message("追加するね！ちょっと待ってね✏️", ephemeral=True)
+        await interaction.response.defer()
         self.stop()
 
     @discord.ui.button(label="ɴᴏ", style=discord.ButtonStyle.danger)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
-        await interaction.response.send_message("キャンセルしたよ✌🏻", ephemeral=True)
+        await interaction.response.defer()
         self.stop()
 
 class DailyReminder(commands.Cog):
@@ -56,14 +55,10 @@ class DailyReminder(commands.Cog):
                 view = ConfirmAddButton()
                 await interaction.response.send_message(warning_message, view=view, ephemeral=True)
                 timeout = await view.wait()
-
+                
                 if view.value is None or view.value is False or timeout:
-                    return  # No or timeoutなら何も追加せず終わる
-                else:
-                    await interaction.followup.defer()  # Yesのときだけ defer（このあとfollowupで送るため）
-        
-        else:
-            await interaction.response.defer()
+                    await interaction.followup.send("キャンセルしたよ✌🏻", ephemeral=True)
+                    return
 
         # --- ここで初めて保存！！
         reminders.append(new_reminder)
@@ -88,13 +83,6 @@ class DailyReminder(commands.Cog):
             f"   {time} {channel.mention} ···▸﻿ {message}"
             + warning
         )
-        
-        # --- 仮メッセージを削除する
-        if hasattr(view, "temp_message") and view.temp_message:
-            try:
-                await view.temp_message.delete()
-            except Exception:
-                pass  # もし削除できなかったら無視する
 
 # --- DailyReminder クラスの中
     @app_commands.command(name="daily_delete", description="毎日のおしらせをやめる")
