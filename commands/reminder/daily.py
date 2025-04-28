@@ -14,17 +14,18 @@ class ConfirmAddButton(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=60)
         self.value = None
+        self.temp_message = None  # 仮のメッセージを保存する変数を追加！
 
     @discord.ui.button(label="ʏᴇꜱ", style=discord.ButtonStyle.success)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = True
-        await interaction.response.defer()  # ← ここで応答だけしておく（メッセージ送らない）
+        self.temp_message = await interaction.response.send_message("追加するね！ちょっと待ってね✏️", ephemeral=True)
         self.stop()
 
     @discord.ui.button(label="ɴᴏ", style=discord.ButtonStyle.danger)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
-        await interaction.response.send_message("キャンセルしたよ✌🏻", ephemeral=True)  # ← Noのときだけここでメッセージ
+        await interaction.response.send_message("キャンセルしたよ✌🏻", ephemeral=True)
         self.stop()
 
 class DailyReminder(commands.Cog):
@@ -87,6 +88,13 @@ class DailyReminder(commands.Cog):
             f"   {time} {channel.mention} ···▸﻿ {message}"
             + warning
         )
+        
+        # --- 仮メッセージを削除する
+        if hasattr(view, "temp_message") and view.temp_message:
+            try:
+                await view.temp_message.delete()
+            except Exception:
+                pass  # もし削除できなかったら無視する
 
 # --- DailyReminder クラスの中
     @app_commands.command(name="daily_delete", description="毎日のおしらせをやめる")
