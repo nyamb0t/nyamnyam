@@ -29,7 +29,7 @@ async def shownumber(interaction: discord.Interaction):
         f"**・チャンネル名を変えるチャンネル**\n{rename_info}"
     )
 
-    await interaction.response.send_message(message, ephemeral=True)
+    await interaction.response.send_message(message)
 
 # --- setup 関数（__init__.py から呼び出される想定）
 async def setup(bot: discord.Client):
