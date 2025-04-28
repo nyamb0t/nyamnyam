@@ -38,10 +38,9 @@ class DailyReminder(commands.Cog):
         channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
 
-        # --- 新しく追加しようとしてるリマインダーを仮作成
         new_reminder = {"time": time, "message": message, "channel_id": channel.id}
 
-        # --- 重複チェック（同じ時間・同じチャンネル）
+        # --- 重複チェック
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
                 warning_message = (
@@ -55,21 +54,17 @@ class DailyReminder(commands.Cog):
                 view = ConfirmAddButton()
                 await interaction.response.send_message(warning_message, view=view, ephemeral=True)
                 timeout = await view.wait()
-                
+
                 if view.value is None or view.value is False or timeout:
                     await interaction.followup.send("キャンセルしたよ✌🏻", ephemeral=True)
                     return
-                    
-                await interaction.followup.defer()   # ★ Yesの場合だけここでフォローアップを予約
 
-        # --- ここで初めて保存！！
+        # --- 保存・スケジューリング
         reminders.append(new_reminder)
         save_reminders(guild_id, REMINDER_TYPE, reminders)
-
-        # --- スケジューリングもここ！
         schedule_daily_reminder(self.bot, guild_id, time, message, channel.id, registered_jobs, REMINDER_TYPE)
 
-        # --- 同じ時間に登録されているリマインダーを表示（新しく追加したものは除く）
+        # --- 同じ時間に登録されてるリマインダー（今追加したやつは除く）
         other_reminders_same_time = [r for r in reminders if r["time"] == time and (r != new_reminder)]
 
         if other_reminders_same_time:
@@ -86,7 +81,7 @@ class DailyReminder(commands.Cog):
             + warning
         )
 
-# --- DailyReminder クラスの中
+    # --- daily_delete, show_daily, daily_clear はいじってないのでそのままでOK！
     @app_commands.command(name="daily_delete", description="毎日のおしらせをやめる")
     @app_commands.describe(time="時間（例: 10:27）")
     async def daily_delete(self, interaction: discord.Interaction, time: str):
@@ -135,11 +130,11 @@ class DailyReminder(commands.Cog):
     async def show_daily(self, interaction: discord.Interaction):
         reminders = load_reminders(interaction.guild.id, REMINDER_TYPE)
         if not reminders:
-            await interaction.response.send_message("꒰ིྀ  ᴍᴇᴏᴡ ʟɪꜱᴛ  ꒱ ིྀ\n    おしらせ予定はありません🐾")
+            await interaction.response.send_message("꒰ིྀ ᴍᴇᴏᴡ ʟɪꜱᴛ ꒱ ིྀ\n    おしらせ予定はありません🐾")
             return
 
         lines = [f"‪‪    {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in reminders]
-        await interaction.response.send_message("꒰ིྀ  ᴍᴇᴏᴡ ʟɪꜱᴛ  ꒱ ིྀ\n" + "\n".join(lines))
+        await interaction.response.send_message("꒰ིྀ ᴍᴇᴏᴡ ʟɪꜱᴛ ꒱ ིྀ\n" + "\n".join(lines))
 
     @app_commands.command(name="daily_clear", description="毎日のおしらせを全部なくす")
     async def daily_clear(self, interaction: discord.Interaction):
@@ -152,7 +147,6 @@ class DailyReminder(commands.Cog):
         save_reminders(guild_id, REMINDER_TYPE, [])
         await interaction.response.send_message("ぼうけん の しょ が きえました ！")
 
-# --- コマンド登録と再スケジュール処理
 async def setup(bot: discord.Client):
     await bot.add_cog(DailyReminder(bot))
     await reload_all_daily_reminders(bot)
