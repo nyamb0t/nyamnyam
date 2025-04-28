@@ -38,48 +38,43 @@ class DailyReminder(commands.Cog):
         channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
 
-        # --- 重複チェックしてボタンで確認させる
+        # --- 新しく追加しようとしてるリマインダーを仮作成
+        new_reminder = {"time": time, "message": message, "channel_id": channel.id}
+
+        # --- 重複チェック（同じ時間・同じチャンネル）
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
-                # 新しく追加しようとしてるリマインダーも仮に作る
-                new_reminder = {"time": time, "message": message, "channel_id": channel.id}
-                
-                # 既存リマインダーと新規リマインダーをまとめて表示する
                 warning_message = (
                     f"同じ時間とチャンネルに先客がいます🐱\n"
                     f"\n**《現在登録されているもの》**\n"
-                    f"　{time} {channel.mention} ···▸﻿ {r['message']}\n"
+                    f"　{r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}\n"
                     f"\n**《今回追加しようとしているもの》**\n"
-                    f"　{time} {channel.mention} ···▸﻿ {new_reminder['message']}\n"
+                    f"　{new_reminder['time']} {channel.mention} ···▸﻿ {new_reminder['message']}\n"
                     f"\n追加する？"
                 )
-                
                 view = ConfirmAddButton()
                 await interaction.response.send_message(warning_message, view=view, ephemeral=True)
                 timeout = await view.wait()
-                
+
                 if view.value is None or view.value is False or timeout:
                     return
                 break
-            
         else:
-            # 重複していない場合のみ defer する
             await interaction.response.defer()
 
-        # --- 保存処理
-        reminder = {"time": time, "message": message, "channel_id": channel.id}
-        reminders.append(reminder)
+        # --- ここで初めて保存！！
+        reminders.append(new_reminder)
         save_reminders(guild_id, REMINDER_TYPE, reminders)
 
-        # --- スケジューリング
+        # --- スケジューリングもここ！
         schedule_daily_reminder(self.bot, guild_id, time, message, channel.id, registered_jobs, REMINDER_TYPE)
 
-        # --- 同じ時間に登録されているすべてのリマインダーを表示する
-        same_time_reminders = [r for r in reminders if r["time"] == time]
-        
-        if same_time_reminders:
+        # --- 同じ時間に登録されているリマインダーを表示（新しく追加したものは除く）
+        other_reminders_same_time = [r for r in reminders if r["time"] == time and (r != new_reminder)]
+
+        if other_reminders_same_time:
             warning_lines = [
-                f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in same_time_reminders
+                f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in other_reminders_same_time
             ]
             warning = "\n\nかくにん！同じ時間のmeow一覧₍˄. ̫.˄ ₎੭\n" + "\n".join(warning_lines)
         else:
