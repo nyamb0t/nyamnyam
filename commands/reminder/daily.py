@@ -31,9 +31,9 @@ class DailyReminder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="setdaily", description="毎日決まった時間におしらせする")
+    @app_commands.command(name="daily_set", description="毎日決まった時間におしらせする")
     @app_commands.describe(time="時間（例: 10:27）", channel="おくるチャンネル", message="おくるメッセージ")
-    async def set_daily(self, interaction: discord.Interaction, time: str, message: str, channel: discord.TextChannel = None):
+    async def daily_set(self, interaction: discord.Interaction, time: str, message: str, channel: discord.TextChannel = None):
         guild_id = interaction.guild.id
         channel = channel or interaction.channel
         reminders = load_reminders(guild_id, REMINDER_TYPE)
@@ -83,9 +83,9 @@ class DailyReminder(commands.Cog):
         )
 
 # --- DailyReminder クラスの中
-    @app_commands.command(name="deletedaily", description="毎日のおしらせをやめる")
+    @app_commands.command(name="daily_delete", description="毎日のおしらせをやめる")
     @app_commands.describe(time="時間（例: 10:27）")
-    async def delete_daily(self, interaction: discord.Interaction, time: str):
+    async def daily_delete(self, interaction: discord.Interaction, time: str):
         await interaction.response.defer()
         guild_id = interaction.guild.id
         reminders = load_reminders(guild_id, REMINDER_TYPE)
@@ -127,7 +127,7 @@ class DailyReminder(commands.Cog):
             view=view
         )
 
-    @app_commands.command(name="showdaily", description="毎日のおしらせ予定が一覧でみれる")
+    @app_commands.command(name="show_daily", description="毎日のおしらせ予定が一覧でみれる")
     async def show_daily(self, interaction: discord.Interaction):
         reminders = load_reminders(interaction.guild.id, REMINDER_TYPE)
         if not reminders:
@@ -137,8 +137,8 @@ class DailyReminder(commands.Cog):
         lines = [f"‪‪    {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in reminders]
         await interaction.response.send_message("꒰ིྀ  ᴍᴇᴏᴡ ʟɪꜱᴛ  ꒱ ིྀ\n" + "\n".join(lines))
 
-    @app_commands.command(name="cleardaily", description="毎日のおしらせを全部なくす")
-    async def clear_daily(self, interaction: discord.Interaction):
+    @app_commands.command(name="daily_clear", description="毎日のおしらせを全部なくす")
+    async def daily_clear(self, interaction: discord.Interaction):
         guild_id = interaction.guild.id
         reminders = load_reminders(guild_id, REMINDER_TYPE)
 
