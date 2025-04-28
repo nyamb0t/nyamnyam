@@ -68,7 +68,7 @@ class MessageHandler(commands.Cog):
                     if re.search(r"【\d{5,6}】", target_channel.name):
                         new_name = re.sub(r"【\d{5,6}】", f"【{number}】", target_channel.name)
                     else:
-                        new_name = f"{target_channel.name} 【{number}】"
+                        new_name = f"{target_channel.name}【{number}】"
                             
                     print(f"DEBUG: チャンネル名を {new_name} に変更するよ")
                     await target_channel.edit(name=new_name)
