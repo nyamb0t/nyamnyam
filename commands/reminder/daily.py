@@ -40,9 +40,11 @@ class DailyReminder(commands.Cog):
 
         new_reminder = {"time": time, "message": message, "channel_id": channel.id}
 
-        # --- 重複チェック
+        # --- 重複チェック（同じ時間・同じチャンネル）
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
+                await interaction.response.defer(ephemeral=True)  # ★スラッシュコマンド受付に即返信
+                
                 warning_message = (
                     f"同じ時間とチャンネルに先客がいます🐱\n"
                     f"\n**《現在登録されているもの》**\n"
@@ -52,7 +54,8 @@ class DailyReminder(commands.Cog):
                     f"\n追加する？"
                 )
                 view = ConfirmAddButton()
-                await interaction.response.send_message(warning_message, view=view, ephemeral=True)
+                await interaction.followup.send(warning_message, view=view)  # ★ここでボタンを出す
+
                 timeout = await view.wait()
 
                 if view.value is None or view.value is False or timeout:
