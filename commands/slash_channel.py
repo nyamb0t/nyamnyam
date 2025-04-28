@@ -8,7 +8,7 @@ from utils.channel_storage import load_guild_data, save_guild_data
 # --- チャンネル追加コマンド（/chset）
 @app_commands.command(name="number_set", description="部屋番をおくるチャンネルを追加する")
 @app_commands.describe(channel="おくる先のチャンネル")
-async def chset(interaction: discord.Interaction, channel: discord.TextChannel):
+async def number_set(interaction: discord.Interaction, channel: discord.TextChannel):
     guild_id = interaction.guild.id
     data = load_guild_data(guild_id)
 
@@ -24,7 +24,7 @@ async def chset(interaction: discord.Interaction, channel: discord.TextChannel):
 # --- チャンネル削除コマンド（/chdelete）
 @app_commands.command(name="number_delete", description="部屋番をおくるチャンネルを解除する")
 @app_commands.describe(channel="解除したいチャンネル（指定しなければ全部きえる！）")
-async def chdelete(interaction: discord.Interaction, channel: discord.TextChannel = None):
+async def number_delete(interaction: discord.Interaction, channel: discord.TextChannel = None):
     guild_id = interaction.guild.id
     data = load_guild_data(guild_id)
 
