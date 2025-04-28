@@ -3,8 +3,8 @@ from discord import app_commands
 from utils.channel_storage import load_guild_data
 
 # --- スラッシュコマンドで現在の数字転送/リネーム設定を確認するコマンド！
-@app_commands.command(name="shownumber", description="数字を送るチャンネルとリネームチャンネルが見れるよ")
-async def shownumber(interaction: discord.Interaction):
+@app_commands.command(name="show_number", description="数字を送るチャンネルとリネームチャンネルが見れるよ")
+async def show_number(interaction: discord.Interaction):
     guild_id = interaction.guild.id
     data = load_guild_data(guild_id)
 
@@ -33,4 +33,4 @@ async def shownumber(interaction: discord.Interaction):
 
 # --- setup 関数（__init__.py から呼び出される想定）
 async def setup(bot: discord.Client):
-    bot.tree.add_command(shownumber)
+    bot.tree.add_command(show_number)
