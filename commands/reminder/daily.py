@@ -41,21 +41,29 @@ class DailyReminder(commands.Cog):
         # --- 重複チェックしてボタンで確認させる
         for r in reminders:
             if r["time"] == time and r["channel_id"] == channel.id:
-                view = ConfirmAddButton()
-                await interaction.response.send_message(
-                    f"同じ時間とチャンネルに先客がいます🐱\n"
-                    f"‪‪   {time} {channel.mention} ‪‪︎···▸﻿ {r['message']}\n"
-                    f"追加する？",
-                    view=view,
-                    ephemeral=True
+                # 新しく追加しようとしてるリマインダーも仮に作る
+                new_reminder = {"time": time, "message": message, "channel_id": channel.id}
+                
+                # 既存リマインダーと新規リマインダーをまとめて表示する
+                warning_message = (
+                　　　f"同じ時間とチャンネルに先客がいます🐱\n"
+                　　　f"\n**《現在登録されているもの》**\n"
+                　　　f"　{time} {channel.mention} ···▸﻿ {r['message']}\n"
+                　　　f"\n**《今回追加しようとしているもの》**\n"
+                　　　f"　{time} {channel.mention} ···▸﻿ {new_reminder['message']}\n"
+                　　　f"\n追加する？"
                 )
+                
+                view = ConfirmAddButton()
+                await interaction.response.send_message(warning_message, view=view, ephemeral=True)
                 timeout = await view.wait()
-
+                
                 if view.value is None or view.value is False or timeout:
                     return
                 break
+            
         else:
-            # 重複していない場合のみ defer する（followupで送るよ〜って宣言）
+            # 重複していない場合のみ defer する
             await interaction.response.defer()
 
         # --- 保存処理
