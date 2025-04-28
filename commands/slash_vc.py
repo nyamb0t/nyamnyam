@@ -5,7 +5,7 @@ import re
 
 # --- チャンネルリネーム設定コマンド（/rename_set）
 # 指定したVCまたはテキストチャンネルを「リネーム対象」に登録する
-@app_commands.command(name="rename_set", description="チャンネル名に部屋番を反映できる")
+@app_commands.command(name="rename_set", description="チャンネル名に部屋番を反映する")
 @app_commands.describe(channel_input="名前をかえるチャンネル（ID･メンション･URL）")
 async def rename_set(interaction: discord.Interaction, channel_input: str):
     guild = interaction.guild  # コマンドを実行したサーバー情報を取得
@@ -44,8 +44,8 @@ async def rename_set(interaction: discord.Interaction, channel_input: str):
 # --- リネーム設定からチャンネルを削除するコマンド（/rename_delete）
 # チャンネルを指定しない → 全部削除
 # チャンネルを指定する → そのチャンネルだけ削除
-@app_commands.command(name="rename_delete", description="リネーム対象から削除する（指定なしで全部削除）")
-@app_commands.describe(channel_input="削除するチャンネル（ID･メンション･URL）※省略すると全部削除")
+@app_commands.command(name="rename_delete", description="チャンネルの名前を変える設定を削除する")
+@app_commands.describe(channel_input="削除するチャンネル（指定しなければ全部きえる！）")
 async def rename_delete(interaction: discord.Interaction, channel_input: str = None):
     guild = interaction.guild
     data = load_guild_data(guild.id)
