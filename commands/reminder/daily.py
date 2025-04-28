@@ -74,11 +74,12 @@ class DailyReminder(commands.Cog):
         # --- スケジューリング
         schedule_daily_reminder(self.bot, guild_id, time, message, channel.id, registered_jobs, REMINDER_TYPE)
 
-        # --- 同じ時間の他チャンネルへの通知チェック
-        duplicates = [r for r in reminders if r["time"] == time and r["channel_id"] != channel.id]
-        if duplicates:
+        # --- 同じ時間に登録されているすべてのリマインダーを表示する
+        same_time_reminders = [r for r in reminders if r["time"] == time]
+        
+        if same_time_reminders:
             warning_lines = [
-                f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in duplicates
+                f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in same_time_reminders
             ]
             warning = "\n\nかくにん！同じ時間のmeow一覧₍˄. ̫.˄ ₎੭\n" + "\n".join(warning_lines)
         else:
