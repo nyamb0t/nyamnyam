@@ -80,7 +80,7 @@ class DailyReminder(commands.Cog):
             warning_lines = [
                 f"‪‪   {r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}" for r in duplicates
             ]
-            warning = "\n\n!! 同じ時間のmeowがあるよ₍˄. ̫.˄ ₎੭\n" + "\n".join(warning_lines)
+            warning = "\n\nかくにん！同じ時間のmeow一覧₍˄. ̫.˄ ₎੭\n" + "\n".join(warning_lines)
         else:
             warning = ""
 
