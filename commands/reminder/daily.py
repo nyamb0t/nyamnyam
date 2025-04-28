@@ -18,13 +18,13 @@ class ConfirmAddButton(discord.ui.View):
     @discord.ui.button(label="ʏᴇꜱ", style=discord.ButtonStyle.success)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = True
-        await interaction.response.send_message("追加しました👌🏻", ephemeral=True)
+        await interaction.response.defer()  # ← ここで応答だけしておく（メッセージ送らない）
         self.stop()
 
     @discord.ui.button(label="ɴᴏ", style=discord.ButtonStyle.danger)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
-        await interaction.response.send_message("キャンセルしたよ✌🏻", ephemeral=True)
+        await interaction.response.send_message("キャンセルしたよ✌🏻", ephemeral=True)  # ← Noのときだけここでメッセージ
         self.stop()
 
 class DailyReminder(commands.Cog):
@@ -57,8 +57,10 @@ class DailyReminder(commands.Cog):
                 timeout = await view.wait()
 
                 if view.value is None or view.value is False or timeout:
-                    return
-                break
+                    return  # No or timeoutなら何も追加せず終わる
+                else:
+                    await interaction.followup.defer()  # Yesのときだけ defer（このあとfollowupで送るため）
+        
         else:
             await interaction.response.defer()
 
