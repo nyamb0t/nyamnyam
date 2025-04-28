@@ -41,26 +41,32 @@ class DailyReminder(commands.Cog):
 
         new_reminder = {"time": time, "message": message, "channel_id": channel.id}
 
-        # --- 重複チェック（同じ時間・同じチャンネル）
-        for r in reminders:
-            if r["time"] == time and r["channel_id"] == channel.id:
-                
-                warning_message = (
-                    f"同じ時間とチャンネルに先客がいます🐱\n"
-                    f"\n**《現在登録されているもの》**\n"
-                    f"　{r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}\n"
-                    f"\n**《今回追加しようとしているもの》**\n"
-                    f"　{new_reminder['time']} {channel.mention} ···▸﻿ {new_reminder['message']}\n"
-                    f"\n追加する？"
-                )
-                view = ConfirmAddButton()
-                await interaction.followup.send(warning_message, view=view)  # ★ここでボタンを出す
+        # --- 同じ時間・同じチャンネルに既にあるリマインダーをまとめて集める
+        same_time_same_channel = [
+            r for r in reminders if r["time"] == time and r["channel_id"] == channel.id
+        ]
 
-                timeout = await view.wait()
+        if same_time_same_channel:
+            warning_message = (
+                f"同じ時間とチャンネルに先客がいます🐱\n"
+                f"\n**《現在登録されているもの》**\n"
+            )
+            for r in same_time_same_channel:
+                warning_message += f"　{r['time']} <#{r['channel_id']}> ···▸﻿ {r['message']}\n"
+            warning_message += (
+                f"\n**《今回追加しようとしているもの》**\n"
+                f"　{new_reminder['time']} {channel.mention} ···▸﻿ {new_reminder['message']}\n"
+                f"\n追加する？"
+            )
 
-                if view.value is None or view.value is False or timeout:
-                    await interaction.followup.send("キャンセルしたよ✌🏻", ephemeral=True)
-                    return
+            view = ConfirmAddButton()
+            await interaction.followup.send(warning_message, view=view)
+
+            timeout = await view.wait()
+
+            if view.value is None or view.value is False or timeout:
+                await interaction.followup.send("キャンセルしたよ✌🏻", ephemeral=True)
+                return
 
         # --- 保存・スケジューリング
         reminders.append(new_reminder)
