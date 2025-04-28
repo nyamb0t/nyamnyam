@@ -59,6 +59,8 @@ class DailyReminder(commands.Cog):
                 if view.value is None or view.value is False or timeout:
                     await interaction.followup.send("キャンセルしたよ✌🏻", ephemeral=True)
                     return
+                    
+                await interaction.followup.defer()   # ★ Yesの場合だけここでフォローアップを予約
 
         # --- ここで初めて保存！！
         reminders.append(new_reminder)
